@@ -44,9 +44,10 @@ class ServerCompilerSettings(object):
                       'port3': 'COM3'}
 
     # This is a static dictionary to define IDE launch options
-    __IDE_launch_options = {'open': 'Open sketch in IDE ',
-                            'verify': 'Verify sketch',
-                            'upload': 'Compile and Upload sketch'}
+    # Modified to only allow to open the sketch in the IDE
+    __IDE_launch_options = {'open': 'Open sketch in IDE'}
+                           #'verify': 'Verify sketch',
+                           #'upload': 'Compile and Upload sketch'}
 
     #
     # Singleton creator and destructor
