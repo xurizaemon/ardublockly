@@ -13,147 +13,19 @@
 goog.provide('Blockly.StaticTyping');
 
 goog.require('Blockly.Block');
+goog.require('Blockly.Type');
+goog.require('Blockly.Types');
 goog.require('Blockly.Workspace');
-
-
-/**
- * "Enum-like" object to create blockly variable types.
- * The number type is used to set a general number from the number block, the
- * block itself then analyses the contents and defines if it is an integer or
- * decimal number.
- * Compatible types have the same value.
- */
-Blockly.StaticTyping.BasicTypes = {
-  TEXT: 'String',              // General text string type
-  BOOLEAN: 'Boolean',          // Boolean type
-  NUMBER: 'Number',            // A general number type
-  DECIMAL: 'Decimal',          // Number type for numbers with a fractional part
-  ARRAY: 'Array',              // Array of any type of items
-  COLOUR: 'Colour',            // For the colour blocks, not used in Ardublockly
-  NULL: null,                  // Used as a "no type" wild card natively
-  UNDEF: 'Undefined',          // Can be used to delegate type assignment
-};
+goog.require('goog.asserts');
 
 /**
- * Blockly Type class constructor.
+ * Class for a Static Typing.
+ * @param {string} name Language name of this generator.
+ * @constructor
  */
-Blockly.StaticTyping.Type = function(args) {
-  if ((args.typeName === undefined) || (args.languageKeyword === undefined) ||
-      (args.basicType === undefined) || (args.compatibleTypes === undefined)) {
-    throw 'Creating a Type requires the following format:\n{\n' +
-          '  typeName: string,\n  languageKeyword: string,\n' +
-          '  basicType: Blockly.StaticTyping.BasicTypes,\n' +
-          '  compatibleTypes: [Blockly.StaticTyping.BasicTypes,]\n}';
-  }
-  if (Array.isArray && !Array.isArray(args.compatibleTypes)) {
-    throw 'The compatible types for a Blockly Types needs to be a string' +
-          'of Blockly.StaticTyping.BasicTypes items.';
-  }
-  /** @type {string} */
-  this.typeName = args.typeName;
-  /** @type {string} */
-  this.languageKeyword = args.languageKeyword;
-  /** @type {Blockly.StaticTyping.BasicTypes} */
-  this.basicType = args.basicType;
-  /** @type {Array<Blockly.StaticTyping.BasicTypes>} */
-  this.compatibleTypes = args.compatibleTypes;
-};
-
-/** @return {Array<string>} List of compatible types, including itself. */
-Blockly.StaticTyping.Type.prototype.compatibles = function() {
-  return this.compatibleTypes.concat(this.basicType);
-};
-
-/** Create the types as instantiated objects on this name space. */
-Blockly.StaticTyping.BlocklyTypes = {
-  // General String type
-  TEXT: new Blockly.StaticTyping.Type({
-    typeName: 'Text',
-    languageKeyword: 'Text',
-    basicType: Blockly.StaticTyping.BasicTypes.TEXT,
-    compatibleTypes: [],
-  }),
-  // Single character
-  CHARACTER: new Blockly.StaticTyping.Type({
-    typeName: 'Character',
-    languageKeyword: 'Character',
-    basicType: Blockly.StaticTyping.BasicTypes.TEXT,
-    compatibleTypes: [],
-  }),
-  // Boolean
-  BOOLEAN: new Blockly.StaticTyping.Type({
-    typeName: 'Boolean',
-    languageKeyword: 'Boolean',
-    basicType: Blockly.StaticTyping.BasicTypes.BOOLEAN,
-    compatibleTypes: [Blockly.StaticTyping.BasicTypes.NUMBER],
-  }),
-  // Integer number
-  NUMBER: new Blockly.StaticTyping.Type({
-    typeName: 'Number',
-    languageKeyword: 'Number',
-    basicType: Blockly.StaticTyping.BasicTypes.NUMBER,
-    compatibleTypes: [Blockly.StaticTyping.BasicTypes.CHARACTER, 
-                      Blockly.StaticTyping.BasicTypes.DECIMAL],
-  }),
-  // Decimal number
-  DECIMAL: new Blockly.StaticTyping.Type({
-    typeName: 'Decimal',
-    languageKeyword: 'Decimal',
-    basicType: Blockly.StaticTyping.BasicTypes.DECIMAL,
-    compatibleTypes: [Blockly.StaticTyping.BasicTypes.NUMBER],
-  }),
-  // Decimal number
-  ARRAY: new Blockly.StaticTyping.Type({
-    typeName: 'Array',
-    languageKeyword: 'Array',
-    basicType: Blockly.StaticTyping.BasicTypes.ARRAY,
-    compatibleTypes: [],
-  }),
-  // Null indicate there is no type
-  NULL: new Blockly.StaticTyping.Type({
-    typeName: 'Null',
-    languageKeyword: 'Null',
-    basicType: Blockly.StaticTyping.BasicTypes.NULL,
-    compatibleTypes: [],
-  }),
-  // Type not defined, or not yet defined
-  UNDEF: new Blockly.StaticTyping.Type({
-    typeName: 'Undefined',
-    languageKeyword: 'Undefined',
-    basicType: Blockly.StaticTyping.BasicTypes.UNDEF,
-    compatibleTypes: [],
-  }),
-  // Set when no child block (supposed to define the variable type) is connected
-  CHILD_BLOCK_MISSING: new Blockly.StaticTyping.Type({
-    typeName: 'ChildBlockMissing',
-    languageKeyword: 'ChildBlockMissing',
-    basicType: Blockly.StaticTyping.BasicTypes.UNDEF,
-    compatibleTypes: [],
-  })
-};
-
-/**
- * Adds another type to the Blockly.StaticTyping.BlocklyTypes collection.
- * @param {string} typeName_ Identifiable name of the type.
- * @param {string} languageKeyword_ Language specific keyword for the type.
- * @param {Blockly.StaticTyping.BasicTypes} basicType_ Defines the basic type
- *     name this type refers to.
- * @param {Array<Blockly.StaticTyping.BasicTypes>} compatibleTypes_ List of
- *     other basic types this Type is compatible with.
- */
-Blockly.StaticTyping.addType =
-    function(typeName_, languageKeyword_, basicType_, compatibleTypes_) {
-  // The name is used as the key from the value pair in the BlocklyTypes object
-  var key = typeName.toUpperCase();
-  if (Blockly.StaticTyping.BlocklyTypes[key] !== undefined) {
-    throw 'The Blockly type ' + key + ' already exists.';
-  }
-  Blockly.StaticTyping.BlocklyTypes[key] = new Blockly.StaticTyping.Type({
-    typeName: typeName_,
-    languageKeyword: languageKeyword_,
-    basicType: basicType_,
-    compatibleTypes: compatibleTypes_,
-  });
+Blockly.StaticTyping = function() {
+  this.varTypeDict = Object.create(null);
+  this.varUndefBlockDict = Object.create(null);
 };
 
 /**
@@ -164,22 +36,45 @@ Blockly.StaticTyping.addType =
  * @return {Array<Blockly.StaticTyping.Type>} Associative array with the 
  *     variable names as the keys and the type as the values.
  */
-Blockly.StaticTyping.getAllVarsWithTypes = function(workspace) {
+Blockly.StaticTyping.prototype.getAllVarsWithTypes = function(workspace) {
+  this.varTypeDict = Object.create(null);
+  this.varUndefBlockDict = Object.create(null);
   var blocks = Blockly.StaticTyping.getAllStatementsOrdered(workspace);
-  var varsWithTypes = Object.create(null);
-  var varUndefBlockList = Object.create(null);
   for (var i = 0; i < blocks.length; i++) {
-    blocks[i].select();  // for step debugging, highlights block in workspace
+    blocks[i].select();    // for step debugging, highlights block in workspace
     // Each statement block iterates through its input children collecting vars
-    var blockVarsWithTypes = Blockly.StaticTyping.getBlockVars(blocks[i]);
-    for (var j = 0; j < blockVarsWithTypes.length; j++) {
-      var varName = blockVarsWithTypes[j][0];
-      var varType = blockVarsWithTypes[j][1];
-      Blockly.StaticTyping.manageVarsWithTypes(
-          blocks[i], varName, varType, varsWithTypes, varUndefBlockList);
+    var blockVarAndTypes = Blockly.StaticTyping.getBlockVars(blocks[i]);
+    for (var j = 0; j < blockVarAndTypes.length; j++) {
+      var varName = blockVarAndTypes[j][0];
+      var varType = blockVarAndTypes[j][1];
+      //this.manageVarTypeDict(blocks[i], varName, varType);
+
+      if (goog.isArray(varType)) {
+        if (this.varTypeDict[varType[1]]){
+          varType = this.varTypeDict[varType[1]];
+        } else {
+          varType = Blockly.Types.UNDEF;
+        }
+      }
+      switch (this.varTypeDict[varName]) {
+        // First time variable is encountered, so set type and callback list
+        case undefined:
+          this.varTypeDict[varName] = varType;
+          this.varUndefBlockDict[varName] = [];
+          break;
+        // Variable encountered before with undefined type, set it now
+        case Blockly.StaticTyping.BlocklyTypes.UNDEF:
+          this.varTypeDict[varName] = varType;
+          break;
+        // Variable with valid type already registered
+        default:
+          Blockly.StaticTyping.manageTypeWarning(
+              blocks[i], varType, varName, this.varTypeDict[varName]);
+          break;
+      }
     }
   }
-  return varsWithTypes;
+  return this.varTypeDict;
 };
 
 /**
@@ -195,7 +90,7 @@ Blockly.StaticTyping.getAllStatementsOrdered = function(workspace) {
   }
 
   /**
-   * Navigates through each continuous block to collect all  statement blocks.
+   * Navigates through each continuous block to collect all statement blocks.
    * Function required to use recursion for block input statements.
    * @param {Blockly.Block} startBlock Block to start iterating from..
    * @return {Array<Blockly.Block>} Array containing all continuous statement
@@ -208,7 +103,7 @@ Blockly.StaticTyping.getAllStatementsOrdered = function(workspace) {
     var blockNextConnection = null;
     var blocks = [];
     do {
-      block.select();  // for step debugging, highlights block in workspace
+      block.select();    // for step debugging, highlights block in workspace
       blocks.push(block);
       blockNextConnection = block.nextConnection;
       connections = block.getConnections_();
@@ -245,11 +140,12 @@ Blockly.StaticTyping.getAllStatementsOrdered = function(workspace) {
 /**
   * Retrieves the input argument block variables with their set type.
   * @param {Blockly.Block} block Block to retrieve variables from.
-  * @return {Array<Blockly.StaticTyping.Type>} Associative array with the block
-  *     variable names as the keys and the BlocklyType as the values.
+  * @return {Array<Array<String, Blockly.StaticTyping.Type>>} Two dimensional
+  *     array with the block variable as the first item pair and variable type
+  *     as the second.
   */
 Blockly.StaticTyping.getBlockVars = function(block) {
-  var blockVarsWithTypes = [];
+  var blockVarAndTypes = [];
   var getVars = block.getVars;
   if (getVars) {
     var blockVariables = getVars.call(block);
@@ -259,14 +155,13 @@ Blockly.StaticTyping.getBlockVars = function(block) {
       var getVarType = block.getVarType;
       if (getVarType) {
         var varType = getVarType.call(block, varName);
-        blockVarsWithTypes.push([varName, varType]);
+        blockVarAndTypes.push([varName, varType]);
       } else {
-        blockVarsWithTypes.push(
-            [varName, Blockly.StaticTyping.BlocklyTypes.UNDEF]);
+        blockVarAndTypes.push([varName, Blockly.Types.NULL]);
       }
     }
-  } // else: !(block.getVars), block does not define vars, so do nothing
-  return blockVarsWithTypes;
+  } // else: !(block.getVars), block does not define variables, so do nothing
+  return blockVarAndTypes;
 };
 
 /**
@@ -281,44 +176,50 @@ Blockly.StaticTyping.getBlockVars = function(block) {
  *     to call back with a type for the variables (used as the key) that they
  *     contain currently undefined.
  */
-Blockly.StaticTyping.manageVarsWithTypes = function(
-    block, varName, varType, varsWithTypes, varUndefBlockList) {
-  if (varsWithTypes[varName] === undefined) {
+Blockly.StaticTyping.prototype.manageVarTypeDict =
+    function(block, varName, varType) {
+  switch (this.varTypeDict[varName]) {
     // First time variable is encountered, so set type and callback list
-    varsWithTypes[varName] = varType;
-    varUndefBlockList[varName] = [];
+    case undefined:
+      this.varTypeDict[varName] = varType;
+      this.varUndefBlockDict[varName] = [];
+      //if (block.setBlockType) {
+      //  if (varType == Blockly.StaticTyping.BlocklyTypes.UNDEF) {
+      //    // This block needs to know its type in the future
+      //    this.varUndefBlockDict[varName].push(block);
+      //  } else {
+      //    block.setBlockType(varType);
+      //  }
+      //}
+      break;
 
-    // If this block type is UNDEF, it will need to know its type
-    if ((varType == Blockly.StaticTyping.BlocklyTypes.UNDEF) &&
-        (block.setBlockType)) {
-      varUndefBlockList[varName].push(block);
-    }
-  } else if (varsWithTypes[varName] ==
-             Blockly.StaticTyping.BlocklyTypes.UNDEF) {
     // Variable encountered before with undefined type, set it now
-    varsWithTypes[varName] = varType;
+    case Blockly.StaticTyping.BlocklyTypes.UNDEF:
+      if (varType == Blockly.Types.UNDEF)
+      this.varTypeDict[varName] = varType;
+      // If this block type is UNDEF, it will need to know its type
+      //if (varType == Blockly.StaticTyping.BlocklyTypes.UNDEF) {
+      //  if (block.setBlockType) {
+      //    this.varUndefBlockDict[varName].push(block);
+      //  }
+      //} else {
+      //  // Valid type added, so update all waiting blocks
+      //  for (var i = 0; i < this.varUndefBlockDict[varName].length; i++) {
+      //    this.varUndefBlockDict[varName][i].setBlockType(varType);
+      //  }
+      //}
+      break;
 
-    // If this block type is UNDEF, it will need to know its type
-    if (varType == Blockly.StaticTyping.BlocklyTypes.UNDEF) {
-      if (block.setBlockType) {
-        varUndefBlockList[varName].push(block);
-      }
-    } else {
-      // Valid type added, so update all waiting blocks
-      for (var i = 0; i < varUndefBlockList[varName].length; i++) {
-        varUndefBlockList[varName][i].setBlockType(varType);
-      }
-    }
-  } else {
     // Variable with valid type already registered
-    Blockly.StaticTyping.manageTypeWarning(
-        block, varType, varName, varsWithTypes[varName]);
-
-    // If this block type is undefined it might need to get its type
-    if ((varType == Blockly.StaticTyping.BlocklyTypes.UNDEF) &&
-        (block.setBlockType)) {
-      block.setBlockType(varsWithTypes[varName]);
-    }
+    default:
+      Blockly.StaticTyping.manageTypeWarning(
+          block, varType, varName, this.varTypeDict[varName]);
+      // If this block type is undefined it might need to get its type
+      if ((varType == Blockly.StaticTyping.BlocklyTypes.UNDEF) &&
+          (block.setBlockType)) {
+        block.setBlockType(this.varTypeDict[varName]);
+      }
+      break;
   }
 };
 
@@ -331,13 +232,13 @@ Blockly.StaticTyping.manageVarsWithTypes = function(
  * @param {!Blockly.StaticTyping.Type} vType The type of the variable.
  */
 Blockly.StaticTyping.manageTypeWarning = function(block, bType, vName, vType) {
-  if ((bType == Blockly.StaticTyping.BlocklyTypes.CHILD_BLOCK_MISSING) ||
-      (vType == Blockly.StaticTyping.BlocklyTypes.CHILD_BLOCK_MISSING)) {
+  if ((bType == Blockly.Types.CHILD_BLOCK_MISSING) ||
+      (vType == Blockly.Types.CHILD_BLOCK_MISSING)) {
     // User still has to attach a block to this variable or its first
     // declaration, so for now do not display any warning
     block.setWarningText(null, 'varType');
   } else if ((vType !== bType) &&
-             (bType !== Blockly.StaticTyping.BlocklyTypes.UNDEF)) {
+             (bType !== Blockly.Types.UNDEF)) {
     block.setWarningText('The variable ' + vName +' has been first assigned' +
         'to the type "' + vType.typeName + '"\nand this block needs it to be ' +
         'set to the type "' + bType.typeName + '" !', 'varType');
@@ -350,15 +251,15 @@ Blockly.StaticTyping.manageTypeWarning = function(block, bType, vName, vType) {
  * Iterates through the list of top level blocks and sets the function arguments
  * types.
  * @param {Blockly.Workspace} workspace Blockly Workspace to collect variables.
- * @param {Array<Blockly.StaticTyping.Type>} varsWithTypes Associative array
- *     with the variable names as the keys and the type as the values.
+ * @param {Array<Blockly.StaticTyping.Type>} Associative array with the variable
+ *     names as the keys and the type as the values.
  */
-Blockly.StaticTyping.setProcedureArgs = function(workspace, varsWithTypes) {
+Blockly.StaticTyping.prototype.setProcedureArgs = function(workspace) {
   var blocks = workspace.getTopBlocks();
   for (var i = 0, length_ = blocks.length; i < length_; i++) {
     var setArgsType = blocks[i].setArgsType;
     if (setArgsType) {
-      setArgsType.call(blocks[i], varsWithTypes);
+      setArgsType.call(blocks[i], this.varTypeDict);
     }
   }
 };
@@ -371,21 +272,34 @@ Blockly.StaticTyping.setProcedureArgs = function(workspace, varsWithTypes) {
 Blockly.StaticTyping.getChildBlockType = function(block) {
   var blockType = null;
   var nextBlock = [block];
-  // TODO: Currently only checking the first of any block children
+  // TODO: Currently only checking the first of any child blocks, so leftmost
+  // block decides type. Incoherences between several input types dealt at a
+  // per-block level with their own block warnings
   while ((nextBlock[0].getBlockType === undefined) &&
          (nextBlock[0].getChildren().length > 0)) {
     nextBlock = nextBlock[0].getChildren();
   }
   if (nextBlock[0] === block) {
     // Set variable block is empty, so no type yet
-    blockType = Blockly.StaticTyping.BlocklyTypes.CHILD_BLOCK_MISSING;
+    blockType = Blockly.Types.CHILD_BLOCK_MISSING;
   } else {
     var func = nextBlock[0].getBlockType;
     if (func) {
       blockType = nextBlock[0].getBlockType();
+      if (blockType == Blockly.Types.UNDEF) {
+        // The child block needs to find its type, if already defined, get it
+        if (nextBlock[0].getVars && nextBlock[0].setBlockType) {
+          var previouslySetType = this.varTypeDict[nextBlock[0].getVars()[0]];
+          if (previouslySetType!== undefined) {
+            nextBlock[0].setBlockType(previouslySetType);
+            blockType = previouslySetType;
+          }
+          
+        }
+      }
     } else {
       // Most inner block, supposed to define a type, is missing getBlockType()
-      blockType = Blockly.StaticTyping.BlocklyTypes.UNDEF;
+      blockType = Blockly.Types.NULL;
     }
   }
   return blockType;
@@ -407,12 +321,11 @@ Blockly.StaticTyping.regExpFloat_ = new RegExp(/^[0-9]*[.][0-9]+$/);
  */
 Blockly.StaticTyping.identifyNumber = function(numberString) {
     if (Blockly.StaticTyping.regExpInt_.test(numberString)) {
-      return Blockly.StaticTyping.BlocklyTypes.NUMBER;
+      return Blockly.Types.NUMBER;
     } else if (Blockly.StaticTyping.regExpFloat_.test(numberString)) {
-      return Blockly.StaticTyping.BlocklyTypes.DECIMAL;
+      return Blockly.Types.DECIMAL;
     }
-    //TODO: This is just a temporary value for easy bug catching.
-    return Blockly.StaticTyping.BlocklyTypes.UNDEF;
+    return Blockly.Types.NULL;
 };
 
 /**
@@ -422,11 +335,10 @@ Blockly.StaticTyping.identifyNumber = function(numberString) {
  */
 Blockly.StaticTyping.blocklyValidTypeArray = function() {
   var typesArray = [];
-  for (var typeKey in Blockly.StaticTyping.BlocklyTypes) {
+  for (var typeKey in Blockly.Types) {
     if ((typeKey !== 'UNDEF') && (typeKey !== 'NULL') &&
         (typeKey !== 'CHILD_BLOCK_MISSING') && (typeKey !== 'ARRAY')) {
-      typesArray.push([Blockly.StaticTyping.BlocklyTypes[typeKey].typeName,
-                       typeKey]);
+      typesArray.push([Blockly.Types[typeKey].typeName, typeKey]);
     }
   }
   return typesArray;
