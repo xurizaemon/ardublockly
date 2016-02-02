@@ -14,6 +14,7 @@
 
 goog.require('Blockly.Blocks');
 goog.require('Blockly.StaticTyping');
+goog.require('Blockly.Types');
 
 
 /** Common HSV hue for all blocks in this category. */
@@ -44,6 +45,6 @@ Blockly.Blocks['variables_set_type'] = {
    */
   getBlockType: function() {
     var blocklyTypeKey = this.getFieldValue('VARIABLE_SETTYPE_TYPE');
-    return Blockly.StaticTyping.BlocklyTypes[blocklyTypeKey];
+    return Blockly.Types[blocklyTypeKey];
   }
 };

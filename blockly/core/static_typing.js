@@ -63,7 +63,7 @@ Blockly.StaticTyping.prototype.getAllVarsWithTypes = function(workspace) {
           this.varUndefBlockDict[varName] = [];
           break;
         // Variable encountered before with undefined type, set it now
-        case Blockly.StaticTyping.BlocklyTypes.UNDEF:
+        case Blockly.Types.UNDEF:
           this.varTypeDict[varName] = varType;
           break;
         // Variable with valid type already registered
@@ -184,7 +184,7 @@ Blockly.StaticTyping.prototype.manageVarTypeDict =
       this.varTypeDict[varName] = varType;
       this.varUndefBlockDict[varName] = [];
       //if (block.setBlockType) {
-      //  if (varType == Blockly.StaticTyping.BlocklyTypes.UNDEF) {
+      //  if (varType == Blockly.Types.UNDEF) {
       //    // This block needs to know its type in the future
       //    this.varUndefBlockDict[varName].push(block);
       //  } else {
@@ -194,11 +194,11 @@ Blockly.StaticTyping.prototype.manageVarTypeDict =
       break;
 
     // Variable encountered before with undefined type, set it now
-    case Blockly.StaticTyping.BlocklyTypes.UNDEF:
+    case Blockly.Types.UNDEF:
       if (varType == Blockly.Types.UNDEF)
       this.varTypeDict[varName] = varType;
       // If this block type is UNDEF, it will need to know its type
-      //if (varType == Blockly.StaticTyping.BlocklyTypes.UNDEF) {
+      //if (varType == Blockly.Types.UNDEF) {
       //  if (block.setBlockType) {
       //    this.varUndefBlockDict[varName].push(block);
       //  }
@@ -215,7 +215,7 @@ Blockly.StaticTyping.prototype.manageVarTypeDict =
       Blockly.StaticTyping.manageTypeWarning(
           block, varType, varName, this.varTypeDict[varName]);
       // If this block type is undefined it might need to get its type
-      if ((varType == Blockly.StaticTyping.BlocklyTypes.UNDEF) &&
+      if ((varType == Blockly.Types.UNDEF) &&
           (block.setBlockType)) {
         block.setBlockType(this.varTypeDict[varName]);
       }

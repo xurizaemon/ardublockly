@@ -90,7 +90,7 @@ Blockly.Types.CHILD_BLOCK_MISSING = new Blockly.StaticTyping.Type({
 
 
 /**
- * Adds another type to the Blockly.StaticTyping.BlocklyTypes collection.
+ * Adds another type to the Blockly.Types collection.
  * @param {string} typeName_ Identifiable name of the type.
  * @param {string} languageKeyword_ Language specific keyword for the type.
  * @param {Blockly.StaticTyping.BasicTypes} basicType_ Defines the basic type
@@ -102,7 +102,7 @@ Blockly.Types.addType =
     function(typeName_, languageKeyword_, basicType_, compatibleTypes_) {
   // The name is used as the key from the value pair in the BlocklyTypes object
   var key = typeName.toUpperCase();
-  if (Blockly.StaticTyping.BlocklyTypes[key] !== undefined) {
+  if (Blockly.Types[key] !== undefined) {
     throw 'The Blockly type ' + key + ' already exists.';
   }
   Blockly.Types[key] = new Blockly.Type({

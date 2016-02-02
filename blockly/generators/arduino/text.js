@@ -193,8 +193,9 @@ Blockly.Arduino['text_prompt_ext'] = function(block) {
 
   // The function code changes based on reading a number or string
   var func = [];
-  var toNumber = returnType == Blockly.StaticTyping.BlocklyTypes
-                               .NUMBER.languageKeyword;
+  // FIXME:
+  throw "need to fix text_prompt_ext generator"
+  var toNumber = returnType == Blockly.Types.NUMBER.languageKeyword;
   if (toNumber) {
     func.push('int ' + Blockly.Arduino.DEF_FUNC_NAME + '(String msg) {');
   } else {
