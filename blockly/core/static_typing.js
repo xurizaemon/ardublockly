@@ -36,7 +36,7 @@ Blockly.StaticTyping = function() {
  * @return {Array<Blockly.StaticTyping.Type>} Associative array with the 
  *     variable names as the keys and the type as the values.
  */
-Blockly.StaticTyping.prototype.getAllVarsWithTypes = function(workspace) {
+Blockly.StaticTyping.prototype.collectVarsWithTypes = function(workspace) {
   this.varTypeDict = Object.create(null);
   this.varUndefBlockDict = Object.create(null);
   var blocks = Blockly.StaticTyping.getAllStatementsOrdered(workspace);
@@ -326,20 +326,4 @@ Blockly.StaticTyping.identifyNumber = function(numberString) {
       return Blockly.Types.DECIMAL;
     }
     return Blockly.Types.NULL;
-};
-
-/**
- * Converts the static types dictionary in to a an array with 2-item arrays.
- * This array only contains the valid types, excluding any error or temp types.
- * @return {!array<array<string>>} Blockly types in the format described above.
- */
-Blockly.StaticTyping.blocklyValidTypeArray = function() {
-  var typesArray = [];
-  for (var typeKey in Blockly.Types) {
-    if ((typeKey !== 'UNDEF') && (typeKey !== 'NULL') &&
-        (typeKey !== 'CHILD_BLOCK_MISSING') && (typeKey !== 'ARRAY')) {
-      typesArray.push([Blockly.Types[typeKey].typeName, typeKey]);
-    }
-  }
-  return typesArray;
 };

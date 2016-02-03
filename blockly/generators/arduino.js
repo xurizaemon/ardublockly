@@ -13,6 +13,7 @@
 goog.provide('Blockly.Arduino');
 
 goog.require('Blockly.Generator');
+goog.require('Blockly.StaticTyping');
 
 
 /**

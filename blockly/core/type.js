@@ -16,6 +16,36 @@ goog.require('goog.asserts');
 
 
 /**
+ * Blockly Type class constructor.
+ */
+Blockly.Type = function(args) {
+  if ((args.typeName === undefined) || (args.languageKeyword === undefined) ||
+      (args.basicType === undefined) || (args.compatibleTypes === undefined)) {
+    throw 'Creating a Type requires the following format:\n{\n' +
+          '  typeName: string,\n  languageKeyword: string,\n' +
+          '  basicType: Blockly.StaticTyping.BasicTypes,\n' +
+          '  compatibleTypes: [Blockly.StaticTyping.BasicTypes,]\n}';
+  }
+  if (!goog.isArray(args.compatibleTypes)) {
+    throw 'The compatible types for a Blockly Types needs to be a string' +
+          'of Blockly.Type.BasicTypes items.';
+  }
+  /** @type {string} */
+  this.typeName = args.typeName;
+  /** @type {string} */
+  this.languageKeyword = args.languageKeyword;
+  /** @type {Blockly.StaticTyping.BasicTypes} */
+  this.basicType = args.basicType;
+  /** @type {Array<Blockly.StaticTyping.BasicTypes>} */
+  this.compatibleTypes = args.compatibleTypes;
+};
+
+/** @return {Array<string>} List of compatible types, including itself. */
+Blockly.Type.prototype.compatibles = function() {
+  return this.compatibleTypes.concat(this.basicType);
+};
+
+/**
  * "Enum-like" object to create blockly variable types.
  * The number type is used to set a general number from the number block, the
  * block itself then analyses the contents and defines if it is an integer or
@@ -31,34 +61,4 @@ Blockly.Type.BasicTypes = {
   COLOUR: 'Colour',            // For the colour blocks, not used in Ardublockly
   NULL: null,                  // Used as a "no type" wild card natively
   UNDEF: 'Undefined',          // Can be used to delegate type assignment
-};
-
-/**
- * Blockly Type class constructor.
- */
-Blockly.Type = function(args) {
-  if ((args.typeName === undefined) || (args.languageKeyword === undefined) ||
-      (args.basicType === undefined) || (args.compatibleTypes === undefined)) {
-    throw 'Creating a Type requires the following format:\n{\n' +
-          '  typeName: string,\n  languageKeyword: string,\n' +
-          '  basicType: Blockly.StaticTyping.BasicTypes,\n' +
-          '  compatibleTypes: [Blockly.StaticTyping.BasicTypes,]\n}';
-  }
-  if (goog.isArray(args.compatibleTypes)) {
-    throw 'The compatible types for a Blockly Types needs to be a string' +
-          'of Blockly.StaticTyping.BasicTypes items.';
-  }
-  /** @type {string} */
-  this.typeName = args.typeName;
-  /** @type {string} */
-  this.languageKeyword = args.languageKeyword;
-  /** @type {Blockly.StaticTyping.BasicTypes} */
-  this.basicType = args.basicType;
-  /** @type {Array<Blockly.StaticTyping.BasicTypes>} */
-  this.compatibleTypes = args.compatibleTypes;
-};
-
-/** @return {Array<string>} List of compatible types, including itself. */
-Blockly.Type.prototype.compatibles = function() {
-  return this.compatibleTypes.concat(this.basicType);
 };
