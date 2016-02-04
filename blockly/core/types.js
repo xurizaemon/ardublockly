@@ -110,7 +110,8 @@ Blockly.Types.getValidTypeArray = function() {
   for (var typeKey in Blockly.Types) {
     if ((typeKey !== 'UNDEF') && (typeKey !== 'CHILD_BLOCK_MISSING') &&
         (typeKey !== 'NULL') && (typeKey !== 'ARRAY') &&
-        (typeof Blockly.Types[typeKey] !== 'function')) {
+        (typeof Blockly.Types[typeKey] !== 'function') &&
+        !(Blockly.Types[typeKey] instanceof RegExp)) {
       typesArray.push([Blockly.Types[typeKey].typeName, typeKey]);
     }
   }
@@ -127,12 +128,15 @@ Blockly.Types.getChildBlockType = function(block) {
   var nextBlock = block;
   // Only checks first input block, so it decides the type. Incoherences amongst
   // multiple inputs dealt at a per-block level with their own block warnings
-  while ((nextBlock.getBlockType === undefined) &&
+  while (nextBlock && (nextBlock.getBlockType === undefined) &&
          (nextBlock.inputList.length > 0)) {
     nextBlock = nextBlock.inputList[0].connection.targetBlock();
   }
   if (nextBlock === block) {
     // Set variable block is empty, so no type yet
+    blockType = Blockly.Types.CHILD_BLOCK_MISSING;
+  } else if (nextBlock === null) {
+    // Null return from targetBlock indicates no block connected
     blockType = Blockly.Types.CHILD_BLOCK_MISSING;
   } else {
     var func = nextBlock.getBlockType;
