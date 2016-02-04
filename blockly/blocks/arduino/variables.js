@@ -13,7 +13,6 @@
 'use strict';
 
 goog.require('Blockly.Blocks');
-goog.require('Blockly.StaticTyping');
 goog.require('Blockly.Types');
 
 

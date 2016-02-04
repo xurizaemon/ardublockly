@@ -13,7 +13,6 @@
 goog.provide('Blockly.Blocks.spi');
 
 goog.require('Blockly.Blocks');
-goog.require('Blockly.StaticTyping');
 goog.require('Blockly.Types');
 
 

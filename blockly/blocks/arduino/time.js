@@ -13,7 +13,6 @@
 goog.provide('Blockly.Blocks.time');
 
 goog.require('Blockly.Blocks');
-goog.require('Blockly.StaticTyping');
 goog.require('Blockly.Types');
 
 

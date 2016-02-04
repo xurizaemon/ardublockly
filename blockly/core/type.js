@@ -17,14 +17,16 @@ goog.require('goog.asserts');
 
 /**
  * Blockly Type class constructor.
+ * @param {Object} args Object/dictionary with typeName, basicType, and
+ *     compatibleTypes.
+ * @constructor
  */
 Blockly.Type = function(args) {
-  if ((args.typeName === undefined) || (args.languageKeyword === undefined) ||
-      (args.basicType === undefined) || (args.compatibleTypes === undefined)) {
+  if ((args.typeName === undefined) || (args.basicType === undefined) ||
+      (args.compatibleTypes === undefined)) {
     throw 'Creating a Type requires the following format:\n{\n' +
-          '  typeName: string,\n  languageKeyword: string,\n' +
-          '  basicType: Blockly.StaticTyping.BasicTypes,\n' +
-          '  compatibleTypes: [Blockly.StaticTyping.BasicTypes,]\n}';
+          '  typeName: string,\n  basicType: Blockly.Type.BasicTypes,\n' +
+          '  compatibleTypes: [Blockly.Type.BasicTypes,]\n}';
   }
   if (!goog.isArray(args.compatibleTypes)) {
     throw 'The compatible types for a Blockly Types needs to be a string' +
@@ -32,11 +34,9 @@ Blockly.Type = function(args) {
   }
   /** @type {string} */
   this.typeName = args.typeName;
-  /** @type {string} */
-  this.languageKeyword = args.languageKeyword;
-  /** @type {Blockly.StaticTyping.BasicTypes} */
+  /** @type {Blockly.Type.BasicTypes} */
   this.basicType = args.basicType;
-  /** @type {Array<Blockly.StaticTyping.BasicTypes>} */
+  /** @type {Array<Blockly.Type.BasicTypes>} */
   this.compatibleTypes = args.compatibleTypes;
 };
 

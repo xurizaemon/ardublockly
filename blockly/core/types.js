@@ -5,8 +5,8 @@
 
 /**
  * @fileoverview Object that defines static objects and methods to assign
- *     Blockly types to Blockly blocks. These can then be converted to language
- *     specific types in each language generator.
+ *     Blockly types to Blockly variables. These can then be converted to
+ *     language specific types in each language generator.
  */
 'use strict';
 
@@ -15,10 +15,9 @@ goog.provide('Blockly.Types');
 goog.require('Blockly.Type');
 
 
-/** Create the types as instantiated objects on this name space. */
+/** Text string. */
 Blockly.Types.TEXT = new Blockly.Type({
   typeName: 'Text',
-  languageKeyword: 'Text',
   basicType: Blockly.Type.BasicTypes.TEXT,
   compatibleTypes: [],
 });
@@ -26,7 +25,6 @@ Blockly.Types.TEXT = new Blockly.Type({
 /** Single character. */
 Blockly.Types.CHARACTER = new Blockly.Type({
   typeName: 'Character',
-  languageKeyword: 'Character',
   basicType: Blockly.Type.BasicTypes.TEXT,
   compatibleTypes: [],
 });
@@ -34,7 +32,6 @@ Blockly.Types.CHARACTER = new Blockly.Type({
 /** Boolean. */
 Blockly.Types.BOOLEAN = new Blockly.Type({
   typeName: 'Boolean',
-  languageKeyword: 'Boolean',
   basicType: Blockly.Type.BasicTypes.BOOLEAN,
   compatibleTypes: [Blockly.Type.BasicTypes.NUMBER],
 });
@@ -42,24 +39,21 @@ Blockly.Types.BOOLEAN = new Blockly.Type({
 /** Integer number. */
 Blockly.Types.NUMBER = new Blockly.Type({
   typeName: 'Number',
-  languageKeyword: 'Number',
   basicType: Blockly.Type.BasicTypes.NUMBER,
-  compatibleTypes: [Blockly.Type.BasicTypes.CHARACTER, 
+  compatibleTypes: [Blockly.Type.BasicTypes.CHARACTER,
                     Blockly.Type.BasicTypes.DECIMAL],
 });
 
-/** Decimal number. */
+/** Decimal/floating point number. */
 Blockly.Types.DECIMAL = new Blockly.Type({
   typeName: 'Decimal',
-  languageKeyword: 'Decimal',
   basicType: Blockly.Type.BasicTypes.DECIMAL,
   compatibleTypes: [Blockly.Type.NUMBER],
 });
 
-/** Decimal number. */
+/** Array/List of items. */
 Blockly.Types.ARRAY = new Blockly.Type({
   typeName: 'Array',
-  languageKeyword: 'Array',
   basicType: Blockly.Type.BasicTypes.ARRAY,
   compatibleTypes: [],
 });
@@ -67,7 +61,6 @@ Blockly.Types.ARRAY = new Blockly.Type({
 /** Null indicate there is no type. */
 Blockly.Types.NULL = new Blockly.Type({
   typeName: 'Null',
-  languageKeyword: 'Null',
   basicType: Blockly.Type.BasicTypes.NULL,
   compatibleTypes: [],
 });
@@ -75,7 +68,6 @@ Blockly.Types.NULL = new Blockly.Type({
 /** Type not defined, or not yet defined. */
 Blockly.Types.UNDEF = new Blockly.Type({
   typeName: 'Undefined',
-  languageKeyword: 'Undefined',
   basicType: Blockly.Type.BasicTypes.UNDEF,
   compatibleTypes: [],
 });
@@ -83,23 +75,19 @@ Blockly.Types.UNDEF = new Blockly.Type({
 /** Set when no child block (meant to define the variable type) is connected. */
 Blockly.Types.CHILD_BLOCK_MISSING = new Blockly.Type({
   typeName: 'ChildBlockMissing',
-  languageKeyword: 'ChildBlockMissing',
   basicType: Blockly.Type.BasicTypes.UNDEF,
   compatibleTypes: [],
 });
 
-
 /**
  * Adds another type to the Blockly.Types collection.
  * @param {string} typeName_ Identifiable name of the type.
- * @param {string} languageKeyword_ Language specific keyword for the type.
- * @param {Blockly.Type.BasicTypes} basicType_ Defines the basic type
- *     name this type refers to.
- * @param {Array<Blockly.Type.BasicTypes>} compatibleTypes_ List of
- *     other basic types this Type is compatible with.
+ * @param {Blockly.Type.BasicTypes} basicType_ Defines the basic type name this
+ *     type refers to.
+ * @param {Array<Blockly.Type.BasicTypes>} compatibleTypes_ List of other basic
+ *     types this Type is compatible with.
  */
-Blockly.Types.addType =
-    function(typeName_, languageKeyword_, basicType_, compatibleTypes_) {
+Blockly.Types.addType = function(typeName_, basicType_, compatibleTypes_) {
   // The name is used as the key from the value pair in the BlocklyTypes object
   var key = typeName.toUpperCase();
   if (Blockly.Types[key] !== undefined) {
@@ -107,7 +95,6 @@ Blockly.Types.addType =
   }
   Blockly.Types[key] = new Blockly.Type({
     typeName: typeName_,
-    languageKeyword: languageKeyword_,
     basicType: basicType_,
     compatibleTypes: compatibleTypes_,
   });
@@ -116,16 +103,72 @@ Blockly.Types.addType =
 /**
  * Converts the static types dictionary in to a an array with 2-item arrays.
  * This array only contains the valid types, excluding any error or temp types.
- * @return {!array<array<string>>} Blockly types in the format described above.
+ * @return {!Array<Array<string>>} Blockly types in the format described above.
  */
 Blockly.Types.getValidTypeArray = function() {
   var typesArray = [];
   for (var typeKey in Blockly.Types) {
-    if ((typeKey !== 'UNDEF') && (typeKey !== 'CHILD_BLOCK_MISSING') && 
+    if ((typeKey !== 'UNDEF') && (typeKey !== 'CHILD_BLOCK_MISSING') &&
         (typeKey !== 'NULL') && (typeKey !== 'ARRAY') &&
         (typeof Blockly.Types[typeKey] !== 'function')) {
       typesArray.push([Blockly.Types[typeKey].typeName, typeKey]);
     }
   }
   return typesArray;
+};
+
+/**
+ * Navigates through child blocks of the argument block to get this block type.
+ * @param {!Blockly.Block} block Block to navigate through children.
+ * @return {Blockly.Type} Type of the input block.
+ */
+Blockly.Types.getChildBlockType = function(block) {
+  var blockType = null;
+  var nextBlock = block;
+  // Only checks first input block, so it decides the type. Incoherences amongst
+  // multiple inputs dealt at a per-block level with their own block warnings
+  while ((nextBlock.getBlockType === undefined) &&
+         (nextBlock.inputList.length > 0)) {
+    nextBlock = nextBlock.inputList[0].connection.targetBlock();
+  }
+  if (nextBlock === block) {
+    // Set variable block is empty, so no type yet
+    blockType = Blockly.Types.CHILD_BLOCK_MISSING;
+  } else {
+    var func = nextBlock.getBlockType;
+    if (func) {
+      blockType = nextBlock.getBlockType();
+    } else {
+      // Most inner block, supposed to define a type, is missing getBlockType()
+      blockType = Blockly.Types.NULL;
+    }
+  }
+  return blockType;
+};
+
+/**
+ * Regular expressions to identify an integer.
+ * @private
+ */
+Blockly.Types.regExpInt_ = new RegExp(/^\d+$/);
+
+/**
+ * Regular expressions to identify a decimal.
+ * @private
+ */
+Blockly.Types.regExpFloat_ = new RegExp(/^[0-9]*[.][0-9]+$/);
+
+/**
+ * Uses regular expressions to identify if the input number is an integer or a
+ * floating point.
+ * @param {string} numberString String of the number to identify.
+ * @return {!Blockly.Type} Blockly type.
+ */
+Blockly.Types.identifyNumber = function(numberString) {
+    if (Blockly.Types.regExpInt_.test(numberString)) {
+      return Blockly.Types.NUMBER;
+    } else if (Blockly.Types.regExpFloat_.test(numberString)) {
+      return Blockly.Types.DECIMAL;
+    }
+    return Blockly.Types.NULL;
 };

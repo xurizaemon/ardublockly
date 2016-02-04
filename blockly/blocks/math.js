@@ -27,7 +27,6 @@
 goog.provide('Blockly.Blocks.math');
 
 goog.require('Blockly.Blocks');
-goog.require('Blockly.StaticTyping');
 goog.require('Blockly.Types');
 
 
@@ -58,7 +57,7 @@ Blockly.Blocks['math_number'] = {
    */
   getBlockType: function() {
     var numString = this.getFieldValue('NUM');
-    return Blockly.StaticTyping.identifyNumber(numString);
+    return Blockly.Types.identifyNumber(numString);
   }
 };
 

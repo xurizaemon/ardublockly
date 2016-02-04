@@ -27,7 +27,6 @@
 goog.provide('Blockly.Blocks.lists');
 
 goog.require('Blockly.Blocks');
-goog.require('Blockly.StaticTyping');
 goog.require('Blockly.Types');
 
 

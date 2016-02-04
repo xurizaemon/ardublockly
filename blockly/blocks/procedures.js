@@ -27,7 +27,6 @@
 goog.provide('Blockly.Blocks.procedures');
 
 goog.require('Blockly.Blocks');
-goog.require('Blockly.StaticTyping');
 goog.require('Blockly.Types');
 
 
@@ -449,7 +448,7 @@ Blockly.Blocks['procedures_defreturn'] = {
       if (returnBlock.getBlockType) {
         returnType = returnBlock.getBlockType();
       } else {
-        returnType = Blockly.StaticTyping.getChildBlockType(returnBlock);
+        returnType = Blockly.Types.getChildBlockType(returnBlock);
       }
     }
     return returnType;

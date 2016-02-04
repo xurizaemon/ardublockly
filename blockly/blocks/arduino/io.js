@@ -15,7 +15,6 @@
 goog.provide('Blockly.Blocks.io');
 
 goog.require('Blockly.Blocks');
-goog.require('Blockly.StaticTyping');
 goog.require('Blockly.Types');
 
 /** Common HSV hue for all blocks in this category. */

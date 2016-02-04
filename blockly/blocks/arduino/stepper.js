@@ -22,7 +22,6 @@
 goog.provide('Blockly.Blocks.stepper');
 
 goog.require('Blockly.Blocks');
-goog.require('Blockly.StaticTyping');
 goog.require('Blockly.Types');
 
 

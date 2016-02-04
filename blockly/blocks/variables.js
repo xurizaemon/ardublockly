@@ -27,7 +27,6 @@
 goog.provide('Blockly.Blocks.variables');
 
 goog.require('Blockly.Blocks');
-goog.require('Blockly.StaticTyping');
 goog.require('Blockly.Types');
 
 
@@ -88,19 +87,6 @@ Blockly.Blocks['variables_get'] = {
     option.callback = Blockly.ContextMenu.callbackFactory(this, xmlBlock);
     options.push(option);
   },
-  /**
-   * Contains the type of the variable selected from the block.
-   * @type {!string} Type from the Static Typing class in string format.
-   */
-  //varType: Blockly.Types.UNDEF,
-  /**
-   * Set this block variable to a type.
-   * @this Blockly.Block
-   * @param {!string} varType Type that this block is to be set to.
-   */
-  //setBlockType: function(varType) {
-  //  this.varType = varType;
-  //},
   /**
    * @return {!string} Retrieves the type (stored in varType) of this block.
    * @this Blockly.Block
@@ -176,6 +162,6 @@ Blockly.Blocks['variables_set'] = {
    * @return {string} String to indicate the type of this block.
    */
   getVarType: function(varName) {
-    return Blockly.StaticTyping.getChildBlockType(this);
+    return Blockly.Types.getChildBlockType(this);
   }
 };
