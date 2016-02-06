@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<meta name="author" content="www.frebsite.nl" />
+		<meta name="viewport" content="width=device-width initial-scale=1.0 maximum-scale=1.0 user-scalable=yes" />
+
+		<title>TiddlyBot - Remote Controls</title>
+
+		<link type="text/css" rel="stylesheet" href="static/css/demo.css" />
+		<link type="text/css" rel="stylesheet" href="static/css/jquery.mmenu.css" />
+
+		<script type="text/javascript" src="static/js/jquery.min.js"></script>
+		<script type="text/javascript" src="static/js/jquery.mmenu.min.js"></script>
+		<script src="static/js/jquery.joystick.js"></script>
+		<script src="static/js/sockjs-0.3.min.js"></script>
+		<script type="text/javascript">
+			$(function() {
+				$('nav#menu').mmenu();
+			});
+		</script>
+
+		<script>
+
+        function layoutControls() {
+
+            var motorStick = $('#motor_stick');
+            var panTiltStick = $('#pan_tilt_stick');
+            var cameraImage = $('#camera');
+            var btnShutdown = $( "#btnShutdown" );
+
+            console.log( screen.width + " " + screen.height );
+
+if (window.innerWidth > window.innerHeight)
+            {
+                // In landscape mode
+                motorStick.css( 'left', '5%' );
+                motorStick.css( 'top', '30%' );
+                panTiltStick.css( 'right', '5%' );
+                panTiltStick.css( 'top', '30%' );
+                panTiltStick.css( 'left', 'auto' );
+                btnShutdown.css( 'position', 'fixed' );
+                btnShutdown.css( 'left', 0.9*screen.width - btnShutdown.width()/2 );
+                btnShutdown.css( 'top', 0.1*screen.height );
+//                cameraImage.css( 'heigh', '98%' );
+            }
+            else
+            {
+                // In portrait mode
+                motorStick.css( 'left', '-5%' );
+                motorStick.css( 'top', '60%' );
+                panTiltStick.css( 'right', '-5%' );
+                panTiltStick.css( 'top', '60%' );
+                panTiltStick.css( 'left', 'auto' );
+                btnShutdown.css( 'position', 'fixed' );
+                btnShutdown.css( 'left', 0.5*screen.width - btnShutdown.width()/2 );
+                btnShutdown.css( 'top', 0.6*screen.height - btnShutdown.height()/2 );
+                cameraImage.css( 'width', '98%' );
+            }
+//            cameraImage.show();
+
+
+        }
+
+        $( window ).on( "orientationchange", function() {
+            setTimeout( layoutControls, 300 ); } );
+         
+        function streamError()
+        {
+             $("#camera").attr( "src", "static/images/background.png" );
+        }
+
+        $(document).ready(function() {
+
+             webSocketURL = "http://" + window.location.hostname + ":5005/control";
+             cameraURL = "http://" + window.location.hostname + ":8080/?action=stream";
+             socket = new SockJS( webSocketURL );
+             var shutdownComplete = false;
+
+             $("#camera").attr( "src", cameraURL );
+             var previousMotorPos={x:0,y:0};
+             $('#motor_stick').joystick({
+                 xSnap: true,
+                 ySnap: true,
+                 moveEvent: function(pos) {
+                    if ( socket.readyState == SockJS.OPEN ) {
+                        if((previousMotorPos.x+0.2 < pos.x || previousMotorPos.x-0.2 > pos.x) |
+                            (previousMotorPos.y+0.2 < pos.y || previousMotorPos.y-0.2 > pos.y)){
+                                socket.send( "Move " + pos.x + " " + pos.y );
+                                previousMotorPos = pos;
+                                          }
+                        if(pos.x==0 && pos.y==0 && (pos.x != previousMotorPos.x || pos.y != previousMotorPos.y)){
+                                socket.send( "Move " + pos.x + " " + pos.y );
+                                previousMotorPos = pos;
+                                          }
+					}
+				},
+                 endEvent: function(pos) {
+                    if ( socket.readyState == SockJS.OPEN ) {
+                        //socket.send( "Move " + pos.x + " " + pos.y );
+					}
+				},
+                 updateIntervalMS: 500,
+                 updateEvent: function(pos) {
+                    if ( socket.readyState == SockJS.OPEN ) {
+                        //socket.send( "Move " + pos.x + " " + pos.y );
+					}
+				}
+             });
+		document.onkeyup = function(e) {
+	                socket.send( "Move 0 0" );
+
+                };
+   
+		document.onkeydown = function(e) {
+		    switch (e.keyCode) {
+		        case 37://left
+        	            if ( socket.readyState == SockJS.OPEN ) 
+	                        socket.send( "Move 1 0" );
+		            break;
+		        case 38://up
+        	            if ( socket.readyState == SockJS.OPEN ) 
+	                        socket.send( "Move 0 1" );
+        		    break;
+		        case 39://right
+        	            if ( socket.readyState == SockJS.OPEN ) 
+	                        socket.send( "Move -1 0" );
+		            break;
+		        case 40://down
+        	            if ( socket.readyState == SockJS.OPEN ) 
+	                        socket.send( "Move 0 -1" );
+		            break;
+		    }
+		};
+
+             $('#pan_tilt_stick').joystick({
+                 xSnap: true,
+                 ySnap: true,
+                 moveEvent: function(pos) {
+                    if ( socket.readyState == SockJS.OPEN ) {
+                        socket.send( "PanTilt " + pos.x + " " + pos.y ); } },
+                 endEvent: function(pos) {
+                    if ( socket.readyState == SockJS.OPEN ) {
+                        socket.send( "PanTilt " + pos.x + " " + pos.y ); } },
+                 clickEvent: function(clickPos) {
+                    if ( socket.readyState == SockJS.OPEN
+                        && Math.abs( clickPos.x ) < 0.3 && Math.abs( clickPos.y ) < 0.3 )
+                    {
+                        socket.send( "Centre" );
+                    } },
+                 updateIntervalMS: 500,
+                 updateEvent: function(pos) {
+                    if ( socket.readyState == SockJS.OPEN ) {
+                        socket.send( "PanTilt " + pos.x + " " + pos.y ); } }
+             });
+             $('#motor_stick').joystick( 'value', 0.0, 0.0 );
+             $('#pan_tilt_stick').joystick( 'value', 0.0, 0.0 );
+
+             $( "#btnShutdown" ).click( function() {
+
+                var SHUTDOWN_TIME_MS = 25000;
+
+                if ( socket.readyState == SockJS.OPEN )
+                {
+                    socket.send( "Shutdown" );
+                }
+
+                $( "#shutdownProgress" ).removeAttr('style');
+                $( "#shutdownText" ).text( "Shutting Down" );
+
+                var modalShutdownDialog = $( "#modalShutdownDialog" );
+                modalShutdownDialog.css( "opacity", 1 );
+                modalShutdownDialog.css( "top", "10%" );
+                modalShutdownDialog.css( "visibility", "visible" );
+
+                // Wait for the Pi to shutdown. The wait time is determined experimentally with an extra couple of seconds
+                // added on for safety
+                setTimeout( function() {
+                    $( "#shutdownProgress" ).css( "visibility", "hidden" );
+                    $( "#shutdownText" ).text( "It is now safe to switch off the power to the Pi" );
+                    shutdownComplete = true;
+                }, SHUTDOWN_TIME_MS );
+
+              } );
+
+            // Add a periodic function to keep the camera and socket alive
+            setInterval( function() {
+                if ( socket.readyState == SockJS.OPEN ) {
+                    //socket.send( "StartStreaming" );
+                    $("#camera").attr( "src", cameraURL );
+
+                    if ( shutdownComplete )
+                    {
+                        $( "#modalShutdownDialog" ).removeAttr('style');    // Reset the shutdown dialog by removing the style attribute added by jQuery
+                        shutdownComplete = false;
+                    }
+
+                } else {
+                    socket = new SockJS( webSocketURL );
+                } }, 1000 );
+
+            layoutControls();
+        });
+    </script>
+
+		<style type="text/css">
+        .joystick {
+            position: relative;
+            width: 230px;
+            height: 230px;
+            -webkit-border-radius: 100%;
+            -moz-border-radius: 100%;
+            border-radius: 100%;
+            /*background-color: #eee;*/
+        }
+        .joystick .inner_circle {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            -webkit-border-radius: 100%;
+            -moz-border-radius: 100%;
+            border-radius: 100%;
+            background-color: #ccc;
+			border: 1px solid rgb(233, 40, 89);
+			opacity: 0.4;
+        }
+        .joystick .handle {
+            position: absolute;
+            width: 54px;
+            height: 54px;
+			/*background-color: rgb(233, 40, 89);
+            border: 1px solid rgb(107, 35, 35);*/
+            border-radius: 5px;
+			opacity: 0.8;
+        }
+		.all_directions {
+			background-image: url(static/images/slider.png);
+			background-repeat: no-repeat;
+		}
+		.up_down {
+			background-image: url(static/images/slider-right.png);
+			background-repeat: no-repeat;
+		}
+
+        #camera {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            width: 640px;
+        }
+
+        #cameraWrapper {
+            /*ransform:rotate(180deg);*/
+            -moz-transform:rotate(180deg);
+            /* Safari and Chrome */
+            -webkit-transform:rotate(180deg);
+        }
+
+        #motor_stick {
+            position: fixed;
+            top: 200px;
+            left: -30px;
+        }
+
+        #pan_tilt_stick {
+            position: fixed;
+            top: 200px;
+            left: 400px;
+        }
+    </style>
+
+	</head>
+	<body>
+		<div id="page">
+			<div class="header">
+				TiddlyBot
+			</div>
+			<div class="content">
+				<p>Make Sure Camera Is Connected To View Stream</p>
+				<div id="cameraWrapper">
+				  <p><img id="camera" src="static/images/background.png" onerror="streamError();"/></p>
+				</div>
+
+				<div class="joystick" id="motor_stick">
+				  <div class="inner_circle"></div>
+				  <div class="handle all_directions"></div>
+				</div>
+
+				<div class="joystick" id="pan_tilt_stick">
+				  <div class="inner_circle"></div>
+				  <div class="handle up_down"></div>
+				</div>
+
+			</div>
+		</div>
+	</body>
+</html>

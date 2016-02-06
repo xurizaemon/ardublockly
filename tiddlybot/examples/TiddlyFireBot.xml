@@ -1,0 +1,337 @@
+<xml xmlns="http://www.w3.org/1999/xhtml">
+  <block type="variables_set" id="12" inline="true" x="-284" y="-64">
+    <field name="VAR">toneA</field>
+    <value name="VALUE">
+      <block type="math_number" id="13">
+        <field name="NUM">440</field>
+      </block>
+    </value>
+    <next>
+      <block type="variables_set" id="119" inline="true">
+        <field name="VAR">toneB</field>
+        <value name="VALUE">
+          <block type="math_number" id="15">
+            <field name="NUM">493</field>
+          </block>
+        </value>
+        <next>
+          <block type="controls_whileUntil" id="107" inline="false">
+            <field name="MODE">WHILE</field>
+            <value name="BOOL">
+              <block type="logic_boolean" id="113">
+                <field name="BOOL">TRUE</field>
+              </block>
+            </value>
+            <statement name="DO">
+              <block type="procedures_callnoreturn" id="251">
+                <mutation name="AvoidObstacle"></mutation>
+                <next>
+                  <block type="procedures_callnoreturn" id="236" inline="false">
+                    <mutation name="PlayTone">
+                      <arg name="toneFrequency"></arg>
+                      <arg name="duration"></arg>
+                    </mutation>
+                    <value name="ARG0">
+                      <block type="variables_get" id="237">
+                        <field name="VAR">toneA</field>
+                      </block>
+                    </value>
+                    <value name="ARG1">
+                      <block type="math_number" id="246">
+                        <field name="NUM">0.5</field>
+                      </block>
+                    </value>
+                    <next>
+                      <block type="procedures_callnoreturn" id="250">
+                        <mutation name="AvoidObstacle"></mutation>
+                        <next>
+                          <block type="procedures_callnoreturn" id="247" inline="false">
+                            <mutation name="PlayTone">
+                              <arg name="toneFrequency"></arg>
+                              <arg name="duration"></arg>
+                            </mutation>
+                            <value name="ARG0">
+                              <block type="variables_get" id="248">
+                                <field name="VAR">toneB</field>
+                              </block>
+                            </value>
+                            <value name="ARG1">
+                              <block type="math_number" id="249">
+                                <field name="NUM">0.5</field>
+                              </block>
+                            </value>
+                          </block>
+                        </next>
+                      </block>
+                    </next>
+                  </block>
+                </next>
+              </block>
+            </statement>
+          </block>
+        </next>
+      </block>
+    </next>
+  </block>
+  <block type="procedures_defnoreturn" id="72" x="25" y="-65">
+    <mutation>
+      <arg name="toneFrequency"></arg>
+      <arg name="duration"></arg>
+    </mutation>
+    <field name="NAME">PlayTone</field>
+    <statement name="STACK">
+      <block type="variables_set" id="73" inline="true">
+        <field name="VAR">currentDuration</field>
+        <value name="VALUE">
+          <block type="math_number" id="74">
+            <field name="NUM">0</field>
+          </block>
+        </value>
+        <next>
+          <block type="variables_set" id="75" inline="true">
+            <field name="VAR">tone</field>
+            <value name="VALUE">
+              <block type="math_arithmetic" id="76" inline="true">
+                <field name="OP">DIVIDE</field>
+                <value name="A">
+                  <block type="math_number" id="77">
+                    <field name="NUM">1.0001</field>
+                  </block>
+                </value>
+                <value name="B">
+                  <block type="variables_get" id="78">
+                    <field name="VAR">toneFrequency</field>
+                  </block>
+                </value>
+              </block>
+            </value>
+            <next>
+              <block type="controls_whileUntil" id="79" inline="false">
+                <field name="MODE">WHILE</field>
+                <value name="BOOL">
+                  <block type="logic_compare" id="80" inline="true">
+                    <field name="OP">LT</field>
+                    <value name="A">
+                      <block type="variables_get" id="81">
+                        <field name="VAR">currentDuration</field>
+                      </block>
+                    </value>
+                    <value name="B">
+                      <block type="variables_get" id="82">
+                        <field name="VAR">duration</field>
+                      </block>
+                    </value>
+                  </block>
+                </value>
+                <statement name="DO">
+                  <block type="io_builtin_buzzer" id="83" inline="true">
+                    <field name="BUILT_IN_LED">1</field>
+                    <value name="STATE">
+                      <block type="io_highlow" id="84">
+                        <field name="STATE">HIGH</field>
+                      </block>
+                    </value>
+                    <next>
+                      <block type="time_delay_seconds" id="85" inline="true">
+                        <value name="DELAY_TIME_MICRO">
+                          <block type="math_arithmetic" id="86" inline="true">
+                            <field name="OP">DIVIDE</field>
+                            <value name="A">
+                              <block type="variables_get" id="87">
+                                <field name="VAR">tone</field>
+                              </block>
+                            </value>
+                            <value name="B">
+                              <block type="math_number" id="88">
+                                <field name="NUM">2</field>
+                              </block>
+                            </value>
+                          </block>
+                        </value>
+                        <next>
+                          <block type="io_builtin_buzzer" id="89" inline="true">
+                            <field name="BUILT_IN_LED">1</field>
+                            <value name="STATE">
+                              <block type="io_highlow" id="90">
+                                <field name="STATE">LOW</field>
+                              </block>
+                            </value>
+                            <next>
+                              <block type="time_delay_seconds" id="91" inline="true">
+                                <value name="DELAY_TIME_MICRO">
+                                  <block type="math_arithmetic" id="92" inline="true">
+                                    <field name="OP">DIVIDE</field>
+                                    <value name="A">
+                                      <block type="variables_get" id="93">
+                                        <field name="VAR">tone</field>
+                                      </block>
+                                    </value>
+                                    <value name="B">
+                                      <block type="math_number" id="94">
+                                        <field name="NUM">2</field>
+                                      </block>
+                                    </value>
+                                  </block>
+                                </value>
+                                <next>
+                                  <block type="variables_set" id="95" inline="true">
+                                    <field name="VAR">currentDuration</field>
+                                    <value name="VALUE">
+                                      <block type="math_arithmetic" id="96" inline="true">
+                                        <field name="OP">ADD</field>
+                                        <value name="A">
+                                          <block type="variables_get" id="97">
+                                            <field name="VAR">currentDuration</field>
+                                          </block>
+                                        </value>
+                                        <value name="B">
+                                          <block type="variables_get" id="98">
+                                            <field name="VAR">tone</field>
+                                          </block>
+                                        </value>
+                                      </block>
+                                    </value>
+                                  </block>
+                                </next>
+                              </block>
+                            </next>
+                          </block>
+                        </next>
+                      </block>
+                    </next>
+                  </block>
+                </statement>
+              </block>
+            </next>
+          </block>
+        </next>
+      </block>
+    </statement>
+  </block>
+  <block type="procedures_defnoreturn" id="124" x="-283" y="292">
+    <mutation></mutation>
+    <field name="NAME">AvoidObstacle</field>
+    <statement name="STACK">
+      <block type="variables_set" id="196" inline="true">
+        <field name="VAR">avoidToneA</field>
+        <value name="VALUE">
+          <block type="math_number" id="205">
+            <field name="NUM">550</field>
+          </block>
+        </value>
+        <next>
+          <block type="variables_set" id="208" inline="true">
+            <field name="VAR">avoidToneB</field>
+            <value name="VALUE">
+              <block type="math_number" id="209">
+                <field name="NUM">600</field>
+              </block>
+            </value>
+            <next>
+              <block type="controls_if" id="153" inline="false">
+                <value name="IF0">
+                  <block type="logic_compare" id="159" inline="true">
+                    <field name="OP">LT</field>
+                    <value name="A">
+                      <block type="sensor_ultrasound_distance" id="177"></block>
+                    </value>
+                    <value name="B">
+                      <block type="math_number" id="168">
+                        <field name="NUM">30</field>
+                      </block>
+                    </value>
+                  </block>
+                </value>
+                <statement name="DO0">
+                  <block type="robot_rotate_left" id="191" inline="true">
+                    <value name="MOVEMENT_SPEED">
+                      <block type="math_number" id="192">
+                        <field name="NUM">100</field>
+                      </block>
+                    </value>
+                    <next>
+                      <block type="controls_repeat_ext" id="260" inline="true">
+                        <value name="TIMES">
+                          <block type="math_number" id="261">
+                            <field name="NUM">2</field>
+                          </block>
+                        </value>
+                        <statement name="DO">
+                          <block type="procedures_callnoreturn" id="193" inline="false">
+                            <mutation name="PlayTone">
+                              <arg name="toneFrequency"></arg>
+                              <arg name="duration"></arg>
+                            </mutation>
+                            <value name="ARG0">
+                              <block type="variables_get" id="210">
+                                <field name="VAR">avoidToneA</field>
+                              </block>
+                            </value>
+                            <value name="ARG1">
+                              <block type="math_number" id="219">
+                                <field name="NUM">0.1</field>
+                              </block>
+                            </value>
+                            <next>
+                              <block type="procedures_callnoreturn" id="220" inline="false">
+                                <mutation name="PlayTone">
+                                  <arg name="toneFrequency"></arg>
+                                  <arg name="duration"></arg>
+                                </mutation>
+                                <value name="ARG0">
+                                  <block type="variables_get" id="221">
+                                    <field name="VAR">avoidToneB</field>
+                                  </block>
+                                </value>
+                                <value name="ARG1">
+                                  <block type="math_number" id="222">
+                                    <field name="NUM">0.1</field>
+                                  </block>
+                                </value>
+                              </block>
+                            </next>
+                          </block>
+                        </statement>
+                      </block>
+                    </next>
+                  </block>
+                </statement>
+                <next>
+                  <block type="controls_if" id="223" inline="false">
+                    <value name="IF0">
+                      <block type="logic_compare" id="224" inline="true">
+                        <field name="OP">LT</field>
+                        <value name="A">
+                          <block type="sensor_ultrasound_distance" id="225"></block>
+                        </value>
+                        <value name="B">
+                          <block type="math_number" id="226">
+                            <field name="NUM">30</field>
+                          </block>
+                        </value>
+                      </block>
+                    </value>
+                    <statement name="DO0">
+                      <block type="procedures_callnoreturn" id="235">
+                        <mutation name="AvoidObstacle"></mutation>
+                      </block>
+                    </statement>
+                    <next>
+                      <block type="robot_forward" id="138" inline="true">
+                        <value name="MOVEMENT_SPEED">
+                          <block type="math_number" id="139">
+                            <field name="NUM">100</field>
+                          </block>
+                        </value>
+                      </block>
+                    </next>
+                  </block>
+                </next>
+              </block>
+            </next>
+          </block>
+        </next>
+      </block>
+    </statement>
+  </block>
+</xml>

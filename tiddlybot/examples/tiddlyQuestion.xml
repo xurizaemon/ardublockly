@@ -1,0 +1,262 @@
+<xml xmlns="http://www.w3.org/1999/xhtml">
+  <block type="procedures_defnoreturn" id="855" x="170" y="-669">
+    <mutation></mutation>
+    <field name="NAME">Think</field>
+    <statement name="STACK">
+      <block type="controls_for" id="1005" inline="true">
+        <field name="VAR">i</field>
+        <value name="FROM">
+          <block type="math_number" id="1006">
+            <field name="NUM">1</field>
+          </block>
+        </value>
+        <value name="TO">
+          <block type="math_number" id="1007">
+            <field name="NUM">10</field>
+          </block>
+        </value>
+        <value name="BY">
+          <block type="math_number" id="1008">
+            <field name="NUM">1</field>
+          </block>
+        </value>
+        <statement name="DO">
+          <block type="io_builtin_buzzer" id="971" inline="true">
+            <field name="BUILT_IN_LED">1</field>
+            <value name="STATE">
+              <block type="io_highlow" id="972">
+                <field name="STATE">HIGH</field>
+              </block>
+            </value>
+            <next>
+              <block type="time_delay_seconds" id="847" inline="true">
+                <value name="DELAY_TIME_MICRO">
+                  <block type="math_arithmetic" id="1017" inline="true">
+                    <field name="OP">DIVIDE</field>
+                    <value name="A">
+                      <block type="math_number" id="848">
+                        <field name="NUM">0.2</field>
+                      </block>
+                    </value>
+                    <value name="B">
+                      <block type="variables_get" id="1018">
+                        <field name="VAR">i</field>
+                      </block>
+                    </value>
+                  </block>
+                </value>
+                <next>
+                  <block type="io_builtin_buzzer" id="993" inline="true">
+                    <field name="BUILT_IN_LED">1</field>
+                    <value name="STATE">
+                      <block type="io_highlow" id="994">
+                        <field name="STATE">LOW</field>
+                      </block>
+                    </value>
+                    <next>
+                      <block type="time_delay_seconds" id="1019" inline="true">
+                        <value name="DELAY_TIME_MICRO">
+                          <block type="math_arithmetic" id="1020" inline="true">
+                            <field name="OP">DIVIDE</field>
+                            <value name="A">
+                              <block type="math_number" id="1021">
+                                <field name="NUM">0.2</field>
+                              </block>
+                            </value>
+                            <value name="B">
+                              <block type="variables_get" id="1022">
+                                <field name="VAR">i</field>
+                              </block>
+                            </value>
+                          </block>
+                        </value>
+                      </block>
+                    </next>
+                  </block>
+                </next>
+              </block>
+            </next>
+          </block>
+        </statement>
+      </block>
+    </statement>
+  </block>
+  <block type="controls_whileUntil" id="762" inline="false" x="-281" y="-612">
+    <field name="MODE">WHILE</field>
+    <value name="BOOL">
+      <block type="logic_boolean" id="768">
+        <field name="BOOL">TRUE</field>
+      </block>
+    </value>
+    <statement name="DO">
+      <block type="controls_if" id="774" inline="false">
+        <value name="IF0">
+          <block type="sensor_button_pressed" id="783"></block>
+        </value>
+        <statement name="DO0">
+          <block type="procedures_callnoreturn" id="856">
+            <mutation name="Think"></mutation>
+            <next>
+              <block type="procedures_callnoreturn" id="753">
+                <mutation name="AnswerTheQuestion"></mutation>
+              </block>
+            </next>
+          </block>
+        </statement>
+      </block>
+    </statement>
+  </block>
+  <block type="procedures_defnoreturn" id="752" x="-328" y="-439">
+    <mutation></mutation>
+    <field name="NAME">AnswerTheQuestion</field>
+    <statement name="STACK">
+      <block type="variables_set" id="786" inline="true">
+        <field name="VAR">decision</field>
+        <value name="VALUE">
+          <block type="math_random_int" id="797" inline="true">
+            <value name="FROM">
+              <block type="math_number" id="798">
+                <field name="NUM">0</field>
+              </block>
+            </value>
+            <value name="TO">
+              <block type="math_number" id="799">
+                <field name="NUM">100</field>
+              </block>
+            </value>
+          </block>
+        </value>
+        <next>
+          <block type="controls_if" id="805" inline="false">
+            <mutation else="1"></mutation>
+            <value name="IF0">
+              <block type="math_number_property" id="1059" inline="true">
+                <mutation divisor_input="false"></mutation>
+                <field name="PROPERTY">EVEN</field>
+                <value name="NUMBER_TO_CHECK">
+                  <block type="variables_get" id="806">
+                    <field name="VAR">decision</field>
+                  </block>
+                </value>
+              </block>
+            </value>
+            <statement name="DO0">
+              <block type="procedures_callnoreturn" id="827">
+                <mutation name="SayNo"></mutation>
+              </block>
+            </statement>
+            <statement name="ELSE">
+              <block type="procedures_callnoreturn" id="842">
+                <mutation name="SayYes"></mutation>
+              </block>
+            </statement>
+          </block>
+        </next>
+      </block>
+    </statement>
+  </block>
+  <block type="procedures_defnoreturn" id="826" x="171" y="-401">
+    <mutation></mutation>
+    <field name="NAME">SayNo</field>
+    <statement name="STACK">
+      <block type="controls_repeat_ext" id="865" inline="true">
+        <value name="TIMES">
+          <block type="math_number" id="866">
+            <field name="NUM">4</field>
+          </block>
+        </value>
+        <statement name="DO">
+          <block type="robot_rotate_left" id="880" inline="true">
+            <value name="MOVEMENT_SPEED">
+              <block type="math_number" id="881">
+                <field name="NUM">100</field>
+              </block>
+            </value>
+            <next>
+              <block type="time_delay_seconds" id="886" inline="true">
+                <value name="DELAY_TIME_MICRO">
+                  <block type="math_number" id="887">
+                    <field name="NUM">0.2</field>
+                  </block>
+                </value>
+                <next>
+                  <block type="robot_rotate_right" id="901" inline="true">
+                    <value name="MOVEMENT_SPEED">
+                      <block type="math_number" id="902">
+                        <field name="NUM">100</field>
+                      </block>
+                    </value>
+                    <next>
+                      <block type="time_delay_seconds" id="903" inline="true">
+                        <value name="DELAY_TIME_MICRO">
+                          <block type="math_number" id="904">
+                            <field name="NUM">0.2</field>
+                          </block>
+                        </value>
+                      </block>
+                    </next>
+                  </block>
+                </next>
+              </block>
+            </next>
+          </block>
+        </statement>
+        <next>
+          <block type="robot_stop" id="1036"></block>
+        </next>
+      </block>
+    </statement>
+  </block>
+  <block type="procedures_defnoreturn" id="841" x="171" y="-116">
+    <mutation></mutation>
+    <field name="NAME">SayYes</field>
+    <statement name="STACK">
+      <block type="controls_repeat_ext" id="917" inline="true">
+        <value name="TIMES">
+          <block type="math_number" id="918">
+            <field name="NUM">4</field>
+          </block>
+        </value>
+        <statement name="DO">
+          <block type="robot_forward" id="932" inline="true">
+            <value name="MOVEMENT_SPEED">
+              <block type="math_number" id="933">
+                <field name="NUM">100</field>
+              </block>
+            </value>
+            <next>
+              <block type="time_delay_seconds" id="938" inline="true">
+                <value name="DELAY_TIME_MICRO">
+                  <block type="math_number" id="939">
+                    <field name="NUM">0.2</field>
+                  </block>
+                </value>
+                <next>
+                  <block type="robot_backward" id="959" inline="true">
+                    <value name="MOVEMENT_SPEED">
+                      <block type="math_number" id="960">
+                        <field name="NUM">100</field>
+                      </block>
+                    </value>
+                    <next>
+                      <block type="time_delay_seconds" id="961" inline="true">
+                        <value name="DELAY_TIME_MICRO">
+                          <block type="math_number" id="962">
+                            <field name="NUM">0.1</field>
+                          </block>
+                        </value>
+                      </block>
+                    </next>
+                  </block>
+                </next>
+              </block>
+            </next>
+          </block>
+        </statement>
+        <next>
+          <block type="robot_stop" id="1050"></block>
+        </next>
+      </block>
+    </statement>
+  </block>
+</xml>

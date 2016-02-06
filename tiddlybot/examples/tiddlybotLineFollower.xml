@@ -1,0 +1,244 @@
+<xml xmlns="http://www.w3.org/1999/xhtml">
+  <block type="controls_whileUntil" id="218" inline="false" x="-235" y="-232">
+    <field name="MODE">WHILE</field>
+    <value name="BOOL">
+      <block type="logic_boolean" id="219">
+        <field name="BOOL">TRUE</field>
+      </block>
+    </value>
+    <statement name="DO">
+      <block type="controls_if" id="220" inline="false">
+        <mutation else="1"></mutation>
+        <value name="IF0">
+          <block type="sensor_on_line" id="222"></block>
+        </value>
+        <statement name="DO0">
+          <block type="robot_forward" id="303" inline="true">
+            <value name="MOVEMENT_SPEED">
+              <block type="math_number" id="304">
+                <field name="NUM">100</field>
+              </block>
+            </value>
+          </block>
+        </statement>
+        <statement name="ELSE">
+          <block type="procedures_callnoreturn" id="223">
+            <mutation name="Find the line on left"></mutation>
+            <next>
+              <block type="controls_if" id="224" inline="false">
+                <value name="IF0">
+                  <block type="logic_negate" id="326" inline="false">
+                    <value name="BOOL">
+                      <block type="sensor_on_line" id="225"></block>
+                    </value>
+                  </block>
+                </value>
+                <statement name="DO0">
+                  <block type="procedures_callnoreturn" id="226">
+                    <mutation name="Find the line on right"></mutation>
+                  </block>
+                </statement>
+              </block>
+            </next>
+          </block>
+        </statement>
+      </block>
+    </statement>
+  </block>
+  <block type="procedures_defnoreturn" id="227" x="-383" y="41">
+    <mutation></mutation>
+    <field name="NAME">Find the line on left</field>
+    <statement name="STACK">
+      <block type="variables_set" id="228" inline="true">
+        <field name="VAR">maxLeftDuration</field>
+        <value name="VALUE">
+          <block type="math_number" id="229">
+            <field name="NUM">0.03</field>
+          </block>
+        </value>
+        <next>
+          <block type="variables_set" id="230" inline="true">
+            <field name="VAR">duration</field>
+            <value name="VALUE">
+              <block type="math_number" id="231">
+                <field name="NUM">0</field>
+              </block>
+            </value>
+            <next>
+              <block type="robot_rotate_left" id="232" inline="true">
+                <value name="MOVEMENT_SPEED">
+                  <block type="math_number" id="233">
+                    <field name="NUM">30</field>
+                  </block>
+                </value>
+                <next>
+                  <block type="controls_whileUntil" id="234" inline="false">
+                    <field name="MODE">WHILE</field>
+                    <value name="BOOL">
+                      <block type="logic_compare" id="235" inline="true">
+                        <field name="OP">LT</field>
+                        <value name="A">
+                          <block type="variables_get" id="236">
+                            <field name="VAR">duration</field>
+                          </block>
+                        </value>
+                        <value name="B">
+                          <block type="variables_get" id="237">
+                            <field name="VAR">maxLeftDuration</field>
+                          </block>
+                        </value>
+                      </block>
+                    </value>
+                    <statement name="DO">
+                      <block type="time_delay_seconds" id="238" inline="true">
+                        <value name="DELAY_TIME_MICRO">
+                          <block type="math_number" id="239">
+                            <field name="NUM">0.01</field>
+                          </block>
+                        </value>
+                        <next>
+                          <block type="variables_set" id="240" inline="true">
+                            <field name="VAR">duration</field>
+                            <value name="VALUE">
+                              <block type="math_arithmetic" id="241" inline="true">
+                                <field name="OP">ADD</field>
+                                <value name="A">
+                                  <block type="variables_get" id="242">
+                                    <field name="VAR">duration</field>
+                                  </block>
+                                </value>
+                                <value name="B">
+                                  <block type="math_number" id="243">
+                                    <field name="NUM">0.01</field>
+                                  </block>
+                                </value>
+                              </block>
+                            </value>
+                            <next>
+                              <block type="controls_if" id="244" inline="false">
+                                <value name="IF0">
+                                  <block type="sensor_on_line" id="246"></block>
+                                </value>
+                                <statement name="DO0">
+                                  <block type="robot_stop" id="247">
+                                    <next>
+                                      <block type="controls_flow_statements" id="248">
+                                        <field name="FLOW">BREAK</field>
+                                      </block>
+                                    </next>
+                                  </block>
+                                </statement>
+                              </block>
+                            </next>
+                          </block>
+                        </next>
+                      </block>
+                    </statement>
+                  </block>
+                </next>
+              </block>
+            </next>
+          </block>
+        </next>
+      </block>
+    </statement>
+  </block>
+  <block type="procedures_defnoreturn" id="249" x="133" y="29">
+    <mutation></mutation>
+    <field name="NAME">Find the line on right</field>
+    <statement name="STACK">
+      <block type="variables_set" id="250" inline="true">
+        <field name="VAR">maxRightDuration</field>
+        <value name="VALUE">
+          <block type="math_number" id="251">
+            <field name="NUM">0.1</field>
+          </block>
+        </value>
+        <next>
+          <block type="variables_set" id="252" inline="true">
+            <field name="VAR">duration</field>
+            <value name="VALUE">
+              <block type="math_number" id="253">
+                <field name="NUM">0</field>
+              </block>
+            </value>
+            <next>
+              <block type="robot_rotate_right" id="254" inline="true">
+                <value name="MOVEMENT_SPEED">
+                  <block type="math_number" id="255">
+                    <field name="NUM">30</field>
+                  </block>
+                </value>
+                <next>
+                  <block type="controls_whileUntil" id="256" inline="false">
+                    <field name="MODE">WHILE</field>
+                    <value name="BOOL">
+                      <block type="logic_compare" id="257" inline="true">
+                        <field name="OP">LT</field>
+                        <value name="A">
+                          <block type="variables_get" id="258">
+                            <field name="VAR">duration</field>
+                          </block>
+                        </value>
+                        <value name="B">
+                          <block type="variables_get" id="259">
+                            <field name="VAR">maxRightDuration</field>
+                          </block>
+                        </value>
+                      </block>
+                    </value>
+                    <statement name="DO">
+                      <block type="time_delay_seconds" id="260" inline="true">
+                        <value name="DELAY_TIME_MICRO">
+                          <block type="math_number" id="261">
+                            <field name="NUM">0.01</field>
+                          </block>
+                        </value>
+                        <next>
+                          <block type="variables_set" id="262" inline="true">
+                            <field name="VAR">duration</field>
+                            <value name="VALUE">
+                              <block type="math_arithmetic" id="263" inline="true">
+                                <field name="OP">ADD</field>
+                                <value name="A">
+                                  <block type="variables_get" id="264">
+                                    <field name="VAR">duration</field>
+                                  </block>
+                                </value>
+                                <value name="B">
+                                  <block type="math_number" id="265">
+                                    <field name="NUM">0.01</field>
+                                  </block>
+                                </value>
+                              </block>
+                            </value>
+                            <next>
+                              <block type="controls_if" id="266" inline="false">
+                                <value name="IF0">
+                                  <block type="sensor_on_line" id="268"></block>
+                                </value>
+                                <statement name="DO0">
+                                  <block type="robot_stop" id="269">
+                                    <next>
+                                      <block type="controls_flow_statements" id="270">
+                                        <field name="FLOW">BREAK</field>
+                                      </block>
+                                    </next>
+                                  </block>
+                                </statement>
+                              </block>
+                            </next>
+                          </block>
+                        </next>
+                      </block>
+                    </statement>
+                  </block>
+                </next>
+              </block>
+            </next>
+          </block>
+        </next>
+      </block>
+    </statement>
+  </block>
+</xml>

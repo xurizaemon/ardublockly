@@ -1,0 +1,161 @@
+<xml>
+  <sep></sep>
+  <category name="Logic">
+    <block type="controls_if"></block>
+    <block type="logic_compare"></block>
+    <block type="logic_operation"></block>
+    <block type="logic_negate"></block>
+    <block type="logic_boolean"></block>
+    <block type="python_raw"></block>
+  </category>
+  <sep></sep>
+  <category name="Loops">
+    <block type="controls_repeat_ext">
+      <value name="TIMES">
+        <block type="math_number">
+          <field name="NUM">10</field>
+        </block>
+      </value>
+    </block>
+    <block type="controls_whileUntil"></block>
+    <block type="controls_for">
+      <value name="FROM">
+        <block type="math_number">
+          <field name="NUM">1</field>
+        </block>
+      </value>
+      <value name="TO">
+        <block type="math_number">
+          <field name="NUM">10</field>
+        </block>
+      </value>
+      <value name="BY">
+        <block type="math_number">
+          <field name="NUM">1</field>
+        </block>
+      </value>
+    </block>
+    <block type="controls_flow_statements"></block>
+  </category>
+  <sep></sep>
+  <category name="Math">
+    <block type="math_number"></block>
+    <block type="math_arithmetic"></block>
+    <block type="math_number_property"></block>
+    <block type="math_change">
+      <value name="DELTA">
+        <block type="math_number">
+          <field name="NUM">1</field>
+        </block>
+      </value>
+    </block>
+    <block type="math_random_int">
+      <value name="FROM">
+        <block type="math_number">
+          <field name="NUM">1</field>
+        </block>
+      </value>
+      <value name="TO">
+        <block type="math_number">
+          <field name="NUM">100</field>
+        </block>
+      </value>
+    </block>
+  </category>
+  <sep></sep>
+  <category name="Variables">
+    <block type="variables_get"></block>
+    <block type="variables_set"></block>
+  </category>
+  <sep></sep>
+  <category name="Functions" custom="PROCEDURE"></category>
+  <sep></sep>
+  <category name="Input/Output">
+    <block type="io_builtin_led">
+      <value name="STATE">
+        <block type="io_highlow"></block>
+      </value>
+    </block>
+    <block type="io_builtin_buzzer">
+      <value name="STATE">
+        <block type="io_highlow"></block>
+      </value>
+    </block>
+    <block type="sensor_on_line"></block>
+    <block type="sensor_button_pressed"></block>
+    <block type="sensor_ultrasound_distance"></block>
+    <block type="io_highlow"></block>
+  </category>
+  <sep></sep>
+  <category name="Time">
+    <block type="time_delay">
+      <value name="DELAY_TIME_MILI">
+        <block type="math_number">
+          <field name="NUM">1000</field>
+        </block>
+      </value>
+    </block>
+    <block type="time_delay_seconds">
+      <value name="DELAY_TIME_MICRO">
+        <block type="math_number">
+          <field name="NUM">1</field>
+        </block>
+      </value>
+    </block>
+  </category>
+  <sep></sep>
+  <category name="Motors">
+    <block type="robot_forward">
+      <value name="MOVEMENT_SPEED">
+        <block type="math_number">
+          <field name="NUM">100</field>
+        </block>
+      </value>
+    </block>
+    <block type="robot_backward">
+      <value name="MOVEMENT_SPEED">
+        <block type="math_number">
+          <field name="NUM">100</field>
+        </block>
+      </value>
+    </block>
+    <block type="robot_left"></block>
+    <block type="robot_right"></block>
+    <block type="robot_rotate_left">
+      <value name="MOVEMENT_SPEED">
+        <block type="math_number">
+          <field name="NUM">100</field>
+        </block>
+      </value>
+    </block>
+    <block type="robot_rotate_right">
+      <value name="MOVEMENT_SPEED">
+        <block type="math_number">
+          <field name="NUM">100</field>
+        </block>
+      </value>
+    </block>
+    <block type="set_speed_motor">
+      <value name="MOVEMENT_SPEED">
+        <block type="math_number">
+          <field name="NUM">90</field>
+        </block>
+      </value>
+    </block>
+    <block type="servo_write">
+      <value name="SERVO_ANGLE">
+        <block type="math_number">
+          <field name="NUM">90</field>
+        </block>
+      </value>
+    </block>
+    <block type="servo_callibration"></block>
+    <block type="robot_stop"></block>
+  </category>
+  <sep></sep>
+  <category name="Python">
+    <block type="python_raw">
+    </block>
+  </category>
+
+</xml>
