@@ -58,6 +58,7 @@ ArduServerCompiler.ajaxPostPlain = function(url, data, callback) {
   var request = ArduServerCompiler.createAjaxRequest();
   request.open("POST", url, true);
   request.setRequestHeader("Content-type","text/plain");
+  request.setRequestHeader("location", url);
 
   // The data received is JSON, so it needs to be converted into the right
   // format to be displayed in the page.
@@ -335,5 +336,12 @@ ArduServerCompiler.sendSketchToServer = function(code, callback) {
   ArduServerCompiler.ajaxPostPlain(
       "SendSketch.html",
       code,
+      callback);
+};
+
+ArduServerCompiler.stopSketchOnServer = function(callback) {
+  ArduServerCompiler.ajaxPostPlain(
+      "StopSketch.html",
+      "",
       callback);
 };

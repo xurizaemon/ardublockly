@@ -31,6 +31,7 @@ goog.require('Blockly.Blocks');
 
 Blockly.Blocks.procedures.HUE = 290;
 
+
 Blockly.Blocks['procedures_defnoreturn'] = {
   /**
    * Block for defining a procedure with no return value.

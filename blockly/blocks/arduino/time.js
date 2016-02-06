@@ -36,7 +36,7 @@ Blockly.Blocks['time_delay'] = {
   }
 };
 
-Blockly.Blocks['time_delaymicros'] = {
+Blockly.Blocks['time_delay_seconds'] = {
   /**
    * delayMicroseconds block definition
    * @this Blockly.Block
@@ -49,7 +49,7 @@ Blockly.Blocks['time_delaymicros'] = {
         .setCheck(Blockly.StaticTyping.blocklyType.NUMBER)
         .appendField('wait');
     this.appendDummyInput()
-        .appendField('microseconds');
+        .appendField('seconds');
     this.setInputsInline(true);
     this.setPreviousStatement(true, null);
     this.setNextStatement(true, null);

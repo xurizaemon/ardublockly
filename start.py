@@ -112,7 +112,7 @@ def main(argv):
         relative_path[0], 'ardublockly'))
     #print('Root & script parent: %s\nCommon & relative path: %s; %s\nIndex: %s'
     #      % (paths, common_path, relative_path, app_index))
-    open_browser(app_index)
+    #open_browser(app_index)
     ArdublocklyServer.BlocklyHTTPServer.start_server(server_root)
 
 

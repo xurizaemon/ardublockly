@@ -9,7 +9,7 @@ except ImportError:
 import ArdublocklyServer.BlocklyRequestHandler
 
 ADDRESS = '0.0.0.0'
-PORT = 8000
+PORT = 80
 
 
 def start_server(document_root):

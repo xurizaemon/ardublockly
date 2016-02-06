@@ -28,6 +28,11 @@ goog.provide('Blockly.Python.procedures');
 
 goog.require('Blockly.Python');
 
+Blockly.Python['python_raw'] = function(block) {
+  var text_python_code = Blockly.Python.valueToCode(block, 'PYTHON_CODE', Blockly.Python.ORDER_STRING_CONVERSION);
+  var code = ''+text_python_code+'\n';
+  return code;
+};
 
 Blockly.Python['procedures_defreturn'] = function(block) {
   // Define a procedure with a return value.

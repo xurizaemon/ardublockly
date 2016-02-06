@@ -79,6 +79,70 @@ Blockly.Python.ORDER_CONDITIONAL = 15;      // if else
 Blockly.Python.ORDER_LAMBDA = 16;           // lambda
 Blockly.Python.ORDER_NONE = 99;             // (...)
 
+
+/**
+ * Arduino Board profiles
+ */
+var profile = {
+  arduino: {
+    name: 'Arduino Uno ',
+    description: 'Arduino Uno standard-compatible board',
+    motor: [['forward', 'forward'], ['backward', 'backward'], ['left', 'turn_left'], ['right', 'turn_right'], ['rotate_right', 'rotate_right'], ['rotate_left', 'rotate_left'], ['stop', 'stop']],
+    direction: [['left', 'SERVO_LEFT_MOTOR'], ['right', 'SERVO_RIGHT_MOTOR']],
+    digital : [['BUZZER', '4'], ['LED_RED', '1'], ['LED_BLUE', '2'], ['LED_GREEN', '3']],
+    digital_in : [['BUTTON', '4'], ['USOUND', '1']],
+    analog : [['A0', 'A0'], ['A1', 'A1'], ['A2', 'A2'], ['A3', 'A3'],
+              ['A4', 'A4'], ['A5', 'A5']],
+    pwm : [['1', 'SERVO2'], ['2', 'SERVO3']],
+    interrupt: [['Int_1', '1'], ['Int_2', '2'], ['Int_3', '3'], ['Int_4', '4'],
+                ['Int_5', '5']],
+    serial : [['serial', 'Serial']],
+    serial_speed : [['300', '300'], ['600', '600'], ['1200', '1200'],
+                    ['2400', '2400'], ['4800', '4800'], ['9600', '9600'],
+                    ['14400', '14400'], ['19200', '19200'], ['28800', '28800'],
+                    ['31250', '31250'], ['38400', '38400'],['57600', '57600'],
+                    ['115200', '115200']],
+    builtin_led: [['red', 'red'], ['green', 'green'], ['blue', 'blue']],
+    builtin_buzzer: [['BUZZER1', '1']],
+    pin_types: { INPUT: 'INPUT', OUTPUT: 'OUTPUT', PWM: 'PWM', SERVO: 'SERVO',
+                 STEPPER: 'STEPPER', SPI: 'SPI' },
+    types : [['void', 'void'], ['Boolean', 'boolean'], ['Character', 'char'],
+             ['Unsigned Character', 'unsigned char'], ['Byte', 'byte'],
+             ['Integer', 'int'], ['Unsigned Integer', 'unsigned int'],
+             ['Word', 'word'], ['Long', 'long'],
+             ['Unsigned Long', 'unsigned long'], ['Short', 'short'],
+             ['Float', 'float'], ['Double', 'double'], ['String', 'String']],
+    spi_clock_divide: [['2 (8MHz)', 'SPI_CLOCK_DIV2'],
+                       ['4 (4MHz)', 'SPI_CLOCK_DIV4'],
+                       ['8 (2MHz)', 'SPI_CLOCK_DIV8'],
+                       ['16 (1MHz)', 'SPI_CLOCK_DIV16'],
+                       ['32 (500KHz)', 'SPI_CLOCK_DIV32'],
+                       ['64 (250KHz)', 'SPI_CLOCK_DIV64'],
+                       ['128 (125KHz)', 'SPI_CLOCK_DIV128']],
+    spi_pins: [['MOSI', '11'], ['MISO', '12'], ['SCK', '13']]
+  },
+  arduino_mega:{
+    description: 'Arduino Mega-compatible board'
+    //53 digital
+    //15 analog
+    //6 interrupts
+    //4 serials
+    //same serial_types
+    //same types
+  },
+  arduino_leonardo:{
+    description: 'Arduino Leonardo-compatible board'
+    //18 digital
+    //6 analog
+    //5 interrupts
+    //same serial
+    //same types
+  }
+};
+
+// Set default profile to arduino standard-compatible board
+profile['default'] = profile['arduino'];
+
 /**
  * Empty loops or conditionals are not allowed in Python.
  */
@@ -94,6 +158,9 @@ Blockly.Python.init = function(workspace) {
   // Create a dictionary mapping desired function names in definitions_
   // to actual function names (to avoid collisions with user functions).
   Blockly.Python.functionNames_ = Object.create(null);
+
+  // Create a dictionary of pins to check if their use conflicts
+  Blockly.Python.pins_ = Object.create(null);
 
   if (!Blockly.Python.variableDB_) {
     Blockly.Python.variableDB_ =

@@ -46,7 +46,7 @@ Blockly.Blocks['io_digitalread'] = {
     this.setColour(Blockly.Blocks.Arduino.io.HUE);
     this.appendDummyInput('')
         .appendField('read digital pin#')
-        .appendField(new Blockly.FieldDropdown(profile.default.digital),
+        .appendField(new Blockly.FieldDropdown(profile.default.digital_in),
                      'PIN');
     this.setOutput(true, Blockly.StaticTyping.blocklyType.BOOLEAN);
     this.setTooltip('Reads the digital value of a pin.');
@@ -87,7 +87,35 @@ Blockly.Blocks['io_builtin_led'] = {
   }
 };
 
-Blockly.Blocks['io_analogwrite'] = {
+Blockly.Blocks['io_builtin_buzzer'] = {
+  /**
+   * Block for setting built-in LED to a state.
+   * @this Blockly.Block
+   */
+  init: function() {
+    this.setHelpUrl('http://arduino.cc/en/Reference/DigitalWrite');
+    this.setColour(Blockly.Blocks.Arduino.io.HUE);
+    this.appendDummyInput('')
+        .appendField('set BUZZER')
+        .appendField(new Blockly.FieldDropdown(profile.default.builtin_buzzer),
+                     'BUILT_IN_LED')
+    this.appendValueInput('STATE', Blockly.StaticTyping.blocklyType.BOOLEAN)
+        .appendField('to')
+        .setCheck(Blockly.StaticTyping.blocklyType.BOOLEAN);
+    this.setInputsInline(true);
+    this.setPreviousStatement(true, null);
+    this.setNextStatement(true, null);
+    this.setTooltip('Turn on or off the built in LED.');
+  },
+  /**
+   * Retrieves the type of return value for the block, in this case an integer.
+   */
+  getType: function() {
+    return Blockly.StaticTyping.blocklyType.INTEGER;
+  }
+};
+
+Blockly.Blocks['io_pwm_buzzer'] = {
   /**
    * Block for creating a 'set pin' to an analogue value.
    * @this Blockly.Block
@@ -96,8 +124,8 @@ Blockly.Blocks['io_analogwrite'] = {
     this.setHelpUrl('http://arduino.cc/en/Reference/AnalogWrite');
     this.setColour(Blockly.Blocks.Arduino.io.HUE);
     this.appendDummyInput('')
-        .appendField('set analogue pin#')
-        .appendField(new Blockly.FieldDropdown(profile.default.analog), 'PIN');
+        .appendField('set BUZZER PWM')
+        .appendField(new Blockly.FieldDropdown(profile.default.builtin_buzzer), 'PIN');
     this.appendValueInput('NUM', Blockly.StaticTyping.blocklyType.NUMBER)
         .appendField('to')
         .setCheck(Blockly.StaticTyping.blocklyType.NUMBER);
@@ -105,28 +133,6 @@ Blockly.Blocks['io_analogwrite'] = {
     this.setPreviousStatement(true, null);
     this.setNextStatement(true, null);
     this.setTooltip('Write analog value between 0 and 255 to a specific Port.');
-  }
-};
-
-Blockly.Blocks['io_analogread'] = {
-  /**
-   * Block for reading an analogue input.
-   * @this Blockly.Block
-   */
-  init: function() {
-    this.setHelpUrl('http://arduino.cc/en/Reference/AnalogRead');
-    this.setColour(Blockly.Blocks.Arduino.io.HUE);
-    this.appendDummyInput('')
-        .appendField('read analogue pin#')
-        .appendField(new Blockly.FieldDropdown(profile.default.analog), 'PIN');
-    this.setOutput(true, Blockly.StaticTyping.blocklyType.NUMBER);
-    this.setTooltip('Return value between 0 and 1024.');
-  },
-  /**
-   * Retrieves the type of return value for the block, in this case an integer.
-   */
-  getType: function() {
-    return Blockly.StaticTyping.blocklyType.INTEGER;
   }
 };
 

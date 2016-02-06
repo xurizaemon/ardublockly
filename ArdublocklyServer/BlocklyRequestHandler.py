@@ -4,6 +4,12 @@ import time
 import json
 import cgi
 import re
+import ArdublocklyServer.blockly_runner as blockly_runner
+from discovery_bot import pins
+from discovery_bot import Movement
+from discovery_bot import Light
+from discovery_bot import Buzzer
+
 try:
     # 2.x name
     import Tkinter
@@ -16,9 +22,9 @@ except ImportError:
     import urllib.parse as urlparse
     import tkinter.filedialog as tkFileDialog
     import http.server as SimpleHTTPServer
-from ArdublocklyServer.Py23Compatibility import Py23Compatibility
-from ArdublocklyServer.ServerCompilerSettings import ServerCompilerSettings
-from ArdublocklyServer.SketchCreator import SketchCreator
+    #from ArdublocklyServer.Py23Compatibility import Py23Compatibility
+    #from ArdublocklyServer.ServerCompilerSettings import ServerCompilerSettings
+    #from ArdublocklyServer.SketchCreator import SketchCreator
 
 
 class BlocklyRequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
@@ -34,6 +40,7 @@ class BlocklyRequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
         content_type, parameters_dict = cgi.parse_header(
             self.headers.get("Content-type"))
         content_length = int(self.headers.get('content-length'))
+	location = str(self.headers.get('location'))
 
         if content_type == 'application/x-www-form-urlencoded':
             parameters = urlparse.parse_qs(
@@ -41,17 +48,21 @@ class BlocklyRequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
                 keep_blank_values=False)
             message_back = handle_settings(parameters)
         elif content_type == 'text/plain':
-            data_string = self.rfile.read(content_length)
-            try:
-                # At this point message back should contain a normal string
-                # with the sketch code
-                message_back =\
-                    '// Ardublockly generated sketch\n\r' + data_string
-            except Exception as e:
-                print(e)
-                print('\nThere was an error manipulating the sketch data!!!')
-            # Returning data is a JSON string with the Arduino CLI output
-            message_back = handle_sketch(message_back)
+	    if location == "SendSketch.html":
+		    data_string = self.rfile.read(content_length)
+		    try:
+		        # At this point message back should contain a normal string
+		        # with the sketch code
+		        message_back =\
+		            '# Ardublockly generated sketch\n\r' + data_string
+		    except Exception as e:
+		        print(e)
+		        print('\nThere was an error manipulating the sketch data!!!')
+		    # Returning data is a JSON string with the Arduino CLI output
+		    message_back = handle_sketch(message_back)
+	    elif location == "StopSketch.html":
+	    	message_back = stop_sketch("msg")
+
         else:
             print('\nError, content type not recognised: ' + str(content_type))
             self.send_response(404, "Ups, not found!")
@@ -147,27 +158,49 @@ def handle_settings(parameters):
 
 
 def handle_sketch(sketch_code):
-    """
-    Creates an Arduino Sketch and invokes the Arduino CLI.
-    Creates a JSON string to return to the page with the following format:
-    {"response_type": "ide_output",
+    app = open('program.py', 'rw+')
+    code_write = ""
+    code_write += sketch_code
+    app.seek(0)
+    app.write(code_write)
+    app.truncate()
+    app.close()
+    blockly_runner.stop()
+    blockly_runner.run('program.py')
+
+    json_data = \
+     {"response_type": "ide_output",
      "element" : "div_ide_output",
      "success" : "true",
-     "conclusion" : Short text as main conclusion,
-     "output" : Output string,
-     "error_output" : Output string,
-     "exit_code": Exit code}
-    """
-    sketch_path = create_sketch_from_string(sketch_code)
-    success, conclusion, out, error, exit_code = load_arduino_cli(sketch_path)
+     "conclusion" : "Program Running",
+     "output" : "Your blockly program is now running!",
+     "error_output" : "Your blockly program is now running!",
+     "exit_code": "Exit code"}
+
+    return json.dumps(json_data)
+
+def stop_sketch(sketch_code):
+    blockly_runner.stop()
+    robot = Movement()
+    red = Light(pins.LED_RED)
+    blue = Light(pins.LED_BLUE)
+    green = Light(pins.LED_GREEN)
+    buzzer = Buzzer()
+    red.off()
+    blue.off()
+    green.off()
+    buzzer.off()
+    robot.stop()
+
     json_data = \
-        {'response_type': 'ide_output',
-         'element': 'div_ide_output',
-         'success': success,
-         'conclusion': conclusion,
-         'output': out,
-         'error_output': error,
-         'exit_code': exit_code}
+     {"response_type": "ide_output",
+     "element" : "div_ide_output",
+     "success" : "true",
+     "conclusion" : "Program Stopped",
+     "output" : "Your program is no longer running!",
+     "error_output" : "Your program is no longer running!",
+     "exit_code": "Exit code"}
+
     return json.dumps(json_data)
 
 
