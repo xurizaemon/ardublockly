@@ -1,10 +1,12 @@
 /**
  * @license Licensed under the Apache License, Version 2.0 (the "License"):
  *          http://www.apache.org/licenses/LICENSE-2.0
- *
+ */
+
+/**
  * @fileoverview Generating Arduino code for the loop blocks.
  *
- * TODO: For each block needs to have lists implemented.
+ * TODO: 'For each' block needs to have lists implemented.
  */
 'use strict';
 
@@ -142,10 +144,10 @@ Blockly.Arduino['controls_for'] = function(block) {
       code += 'abs(' + increment + ');\n';
     }
     code += 'if (' + startVar + ' > ' + endVar + ') {\n';
-    code += Blockly.Arduino.INDENT + incVar + ' = -' + incVar +';\n';
+    code += Blockly.Arduino.INDENT + incVar + ' = -' + incVar + ';\n';
     code += '}\n';
     code += 'for (' + variable0 + ' = ' + startVar + ';\n' +
-        '     '  + incVar + ' >= 0 ? ' +
+        '     ' + incVar + ' >= 0 ? ' +
         variable0 + ' <= ' + endVar + ' : ' +
         variable0 + ' >= ' + endVar + ';\n' +
         '     ' + variable0 + ' += ' + incVar + ') {\n' +
@@ -172,7 +174,7 @@ Blockly.Arduino['controls_forEach'] = function(block) {
   branch = Blockly.Arduino.addLoopTrap(branch, block.id);
   var indexVar = Blockly.Arduino.variableDB_.getDistinctName(
       variable0 + '_index', Blockly.Variables.NAME_TYPE);
-  branch = Blockly.Arduino.INDENT + variable0 + ' = ' + argument0 + 
+  branch = Blockly.Arduino.INDENT + variable0 + ' = ' + argument0 +
       '[' + indexVar + '];\n' + branch;
   var code = 'for (int ' + indexVar + ' in  ' + argument0 + ') {\n' +
       branch + '}\n';

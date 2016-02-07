@@ -32,17 +32,19 @@ goog.require('goog.math');
 /**
  * Class for a workspace.  This is a data structure that contains blocks.
  * There is no UI, and can be created headlessly.
- * @param {Object} opt_options Dictionary of options.
+ * @param {Object=} opt_options Dictionary of options.
  * @constructor
  */
 Blockly.Workspace = function(opt_options) {
-  /**
-   * @type {!Array.<!Blockly.Block>}
-   * @private
-   */
-  this.topBlocks_ = [];
+  /** @type {string} */
+  this.id = Blockly.genUid();
+  Blockly.Workspace.WorkspaceDB_[this.id] = this;
+  /** @type {!Object} */
   this.options = opt_options || {};
+  /** @type {boolean} */
   this.RTL = !!this.options.RTL;
+  /** @type {!Array.<!Blockly.Block>} */
+  this.topBlocks_ = [];
 };
 
 /**
@@ -57,6 +59,8 @@ Blockly.Workspace.prototype.rendered = false;
  */
 Blockly.Workspace.prototype.dispose = function() {
   this.clear();
+  // Remove from workspace database.
+  delete Blockly.Workspace.WorkspaceDB_[this.id];
 };
 
 /**
@@ -150,6 +154,18 @@ Blockly.Workspace.prototype.getWidth = function() {
 };
 
 /**
+ * Obtain a newly created block.
+ * @param {?string} prototypeName Name of the language object containing
+ *     type-specific functions for this block.
+ * @param {=string} opt_id Optional ID.  Use this ID if provided, otherwise
+ *     create a new id.
+ * @return {!Blockly.Block} The created block.
+ */
+Blockly.Workspace.prototype.newBlock = function(prototypeName, opt_id) {
+  return new Blockly.Block(this, prototypeName, opt_id);
+};
+
+/**
  * Finds the block with the specified ID in this workspace.
  * @param {string} id ID of block to find.
  * @return {Blockly.Block} The matching block, or null if not found.
@@ -185,32 +201,19 @@ Blockly.Workspace.prototype.fireChangeEvent = function() {
 };
 
 /**
- * Modify the block tree on the existing toolbox.
- * @param {Node|string} tree DOM tree of blocks, or text representation of same.
+ * Database of all workspaces.
+ * @private
  */
-Blockly.Workspace.prototype.updateToolbox = function(tree) {
-  tree = Blockly.parseToolboxTree_(tree);
-  if (!tree) {
-    if (this.options.languageTree) {
-      throw 'Can\'t nullify an existing toolbox.';
-    }
-    // No change (null to null).
-    return;
-  }
-  if (!this.options.languageTree) {
-    throw 'Existing toolbox is null.  Can\'t create new toolbox.';
-  }
-  if (this.options.hasCategories) {
-    if (!this.toolbox_) {
-      throw 'Existing toolbox has no categories.  Can\'t change mode.';
-    }
-    this.options.languageTree = tree;
-    this.toolbox_.populate_(tree);
-  } else {
-    if (!this.flyout_) {
-      throw 'Existing toolbox has categories.  Can\'t change mode.';
-    }
-    this.options.languageTree = tree;
-    this.flyout_.show(tree.childNodes);
-  }
+Blockly.Workspace.WorkspaceDB_ = Object.create(null);
+
+/**
+ * Find the workspace with the specified ID.
+ * @param {string} id ID of workspace to find.
+ * @return {Blockly.Workspace} The sought after workspace or null if not found.
+ */
+Blockly.Workspace.getById = function(id) {
+  return Blockly.Workspace.WorkspaceDB_[id] || null;
 };
+
+// Export symbols that would otherwise be renamed by Closure compiler.
+Blockly.Workspace.prototype['clear'] = Blockly.Workspace.prototype.clear;

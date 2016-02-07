@@ -27,8 +27,12 @@
 goog.provide('Blockly.Blocks.texts');
 
 goog.require('Blockly.Blocks');
+goog.require('Blockly.Types');
 
 
+/**
+ * Common HSV hue for all blocks in this category.
+ */
 Blockly.Blocks.texts.HUE = 160;
 
 Blockly.Blocks['text'] = {
@@ -43,7 +47,7 @@ Blockly.Blocks['text'] = {
         .appendField(this.newQuote_(true))
         .appendField(new Blockly.FieldTextInput(''), 'TEXT')
         .appendField(this.newQuote_(false));
-    this.setOutput(true, Blockly.StaticTyping.blocklyType.TEXT);
+    this.setOutput(true, Blockly.Types.TEXT.basicType);
     this.setTooltip(Blockly.Msg.TEXT_TEXT_TOOLTIP);
   },
   /**
@@ -55,17 +59,15 @@ Blockly.Blocks['text'] = {
    */
   newQuote_: function(open) {
     if (open == this.RTL) {
-      var file = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAKCAYAAACALL/6AAAA0UlEQVQY023QP0oDURSF8e8MImhlUIiCjWKhrUUK3YCIVkq6bMAF2LkCa8ENWLoNS1sLEQKprMQ/GBDks3kDM+Oc8nfPfTxuANQTYBeYAvdJLL4FnAFfwF2ST9Rz27kp5YH/kwrYp50LdaXHAU4rYNYzWAdeenx7AbgF5sAhcARsAkkyVQ+ACbAKjIGqta4+l78udXxc/LiJG+qvet0pV+q7+tHE+iJzdbGz8FhmOzVcqj/qq7rcKI7Ut1Leq70C1oCrJMMk343HB8ADMEzyVOMff72l48gwfqkAAAAASUVORK5CYII=';
+      var file = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAKCAQAAAAqJXdxAAAAqUlEQVQI1z3KvUpCcRiA8ef9E4JNHhI0aFEacm1o0BsI0Slx8wa8gLauoDnoBhq7DcfWhggONDmJJgqCPA7neJ7p934EOOKOnM8Q7PDElo/4x4lFb2DmuUjcUzS3URnGib9qaPNbuXvBO3sGPHJDRG6fGVdMSeWDP2q99FQdFrz26Gu5Tq7dFMzUvbXy8KXeAj57cOklgA+u1B5AoslLtGIHQMaCVnwDnADZIFIrXsoXrgAAAABJRU5ErkJggg==';
     } else {
-      var file = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAKCAYAAACALL/6AAAAvklEQVQY022PoapCQRRF97lBVDRYhBcEQcP1BwS/QLAqr7xitZn0HzRr8Rts+htmQdCqSbQIwmMZPMIw3lVmZu0zG44UAFSBLdBVBDAFZqFo8eYKtANfBC7AE5h8ZNOHd1FrDnh4VgmDO3ADkujDHPgHfkLZ84bfaLjg/hD6RFLq9z6wBDr+rvuZB1bAEDABY76pA2mGHyWSjvqmIemc4WsCLKOp4nssIj8wD8qS/iSVJK3N7OTeJPV9n72ZbV7iDuSc2BaQBQAAAABJRU5ErkJggg==';
+      var file = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAKCAQAAAAqJXdxAAAAn0lEQVQI1z3OMa5BURSF4f/cQhAKjUQhuQmFNwGJEUi0RKN5rU7FHKhpjEH3TEMtkdBSCY1EIv8r7nFX9e29V7EBAOvu7RPjwmWGH/VuF8CyN9/OAdvqIXYLvtRaNjx9mMTDyo+NjAN1HNcl9ZQ5oQMM3dgDUqDo1l8DzvwmtZN7mnD+PkmLa+4mhrxVA9fRowBWmVBhFy5gYEjKMfz9AylsaRRgGzvZAAAAAElFTkSuQmCC';
     }
     return new Blockly.FieldImage(file, 12, 12, '"');
   },
-  /**
-   * Assigns a type to the block, text block is always a string.
-   */
-  getType: function() {
-    return Blockly.StaticTyping.blocklyType.TEXT;
+  /** @return {!string} Type of the block, text block always a string. */
+  getBlockType: function() {
+    return Blockly.Types.TEXT;
   }
 };
 
@@ -79,13 +81,13 @@ Blockly.Blocks['text_join'] = {
     this.setColour(Blockly.Blocks.texts.HUE);
     this.itemCount_ = 2;
     this.updateShape_();
-    this.setOutput(true, Blockly.StaticTyping.blocklyType.TEXT);
+    this.setOutput(true, Blockly.Types.TEXT.basicType);
     this.setMutator(new Blockly.Mutator(['text_create_join_item']));
     this.setTooltip(Blockly.Msg.TEXT_JOIN_TOOLTIP);
   },
   /**
    * Create XML to represent number of text inputs.
-   * @return {Element} XML storage element.
+   * @return {!Element} XML storage element.
    * @this Blockly.Block
    */
   mutationToDom: function() {
@@ -109,12 +111,11 @@ Blockly.Blocks['text_join'] = {
    * @this Blockly.Block
    */
   decompose: function(workspace) {
-    var containerBlock = Blockly.Block.obtain(workspace,
-                                           'text_create_join_container');
+    var containerBlock = workspace.newBlock('text_create_join_container');
     containerBlock.initSvg();
     var connection = containerBlock.getInput('STACK').connection;
     for (var i = 0; i < this.itemCount_; i++) {
-      var itemBlock = Blockly.Block.obtain(workspace, 'text_create_join_item');
+      var itemBlock = workspace.newBlock('text_create_join_item');
       itemBlock.initSvg();
       connection.connect(itemBlock.previousConnection);
       connection = itemBlock.nextConnection;
@@ -130,14 +131,12 @@ Blockly.Blocks['text_join'] = {
     var itemBlock = containerBlock.getInputTargetBlock('STACK');
     // Count number of inputs.
     var connections = [];
-    var i = 0;
     while (itemBlock) {
-      connections[i] = itemBlock.valueConnection_;
+      connections.push(itemBlock.valueConnection_);
       itemBlock = itemBlock.nextConnection &&
           itemBlock.nextConnection.targetBlock();
-      i++;
     }
-    this.itemCount_ = i;
+    this.itemCount_ = connections.length;
     this.updateShape_();
     // Reconnect any child blocks.
     for (var i = 0; i < this.itemCount_; i++) {
@@ -192,13 +191,12 @@ Blockly.Blocks['text_join'] = {
       }
     }
   },
-  /**
-   * Assigns a type to the block, this block always returns a string.
-   */
-  getType: function() {
-    return Blockly.StaticTyping.blocklyType.TEXT;
-  },
-  newQuote_: Blockly.Blocks['text'].newQuote_};
+  newQuote_: Blockly.Blocks['text'].newQuote_,
+  /** @return {!string} Type of the block, text join always a string. */
+  getBlockType: function() {
+    return Blockly.Types.TEXT;
+  }
+};
 
 Blockly.Blocks['text_create_join_container'] = {
   /**
@@ -274,34 +272,13 @@ Blockly.Blocks['text_append'] = {
     }
   },
   /**
-   * Finds the type of the variable selected in the drop down. Sets it to an
-   * a string if it has not been defined before.
-   * @this Blockly.Block
-   * @param {Array<string>} existingVars Associativ array of variables already
-   *                                     defined. Variable name as key, and 
-   *                                     type as value.
-   * @return {string} String to indicate the type if it has not been defined
-   *                  before.
+   * Set's the type of the variable selected in the drop down list. As there is
+   * only one possible option, the variable input is not really checked.
+   * @param {!string} varName Name of the variable to check type.
+   * @return {string} String to indicate the variable type.
    */
-  getVarType: function(existingVars) {
-    var varName = this.getFieldValue('VAR');
-
-    // Check if variable has been defined already
-    var varType = Blockly.StaticTyping.findListVarType(varName, existingVars);
-    if (varType != null) {
-      if (varType != Blockly.StaticTyping.blocklyType.TEXT) {
-        this.setWarningText('This variable type has been previously set to a ' +
-            existingVars[varName] + ' and it needs to be Text!');
-      } else {
-        this.setWarningText(null);
-      }
-    } else {
-      // not defined, so set it to a string
-      varType = Blockly.StaticTyping.blocklyType.TEXT;
-      this.setWarningText(null);
-    }
-
-    return varType;
+  getVarType: function(varName) {
+    return Blockly.Types.TEXT;
   }
 };
 
@@ -311,21 +288,25 @@ Blockly.Blocks['text_length'] = {
    * @this Blockly.Block
    */
   init: function() {
-    this.setHelpUrl(Blockly.Msg.TEXT_LENGTH_HELPURL);
-    this.setColour(Blockly.Blocks.texts.HUE);
-    this.interpolateMsg(Blockly.Msg.TEXT_LENGTH_TITLE,
-                        ['VALUE',
-                         [Blockly.StaticTyping.blocklyType.TEXT, 'Array'],
-                         Blockly.ALIGN_RIGHT],
-                        Blockly.ALIGN_RIGHT);
-    this.setOutput(true, Blockly.StaticTyping.blocklyType.NUMBER);
-    this.setTooltip(Blockly.Msg.TEXT_LENGTH_TOOLTIP);
+    this.jsonInit({
+      "message0": Blockly.Msg.TEXT_LENGTH_TITLE,
+      "args0": [
+        {
+          "type": "input_value",
+          "name": "VALUE",
+          "check": Blockly.Types.TEXT.compatibles()
+                   .concat('Array'),
+        }
+      ],
+      "output": Blockly.Types.NUMBER.basicType,
+      "colour": Blockly.Blocks.texts.HUE,
+      "tooltip": Blockly.Msg.TEXT_LENGTH_TOOLTIP,
+      "helpUrl": Blockly.Msg.TEXT_LENGTH_HELPURL
+    });
   },
-  /**
-   * Assigns a type to the block, length always returns an integer number.
-   */
-  getType: function() {
-    return Blockly.StaticTyping.blocklyType.INTEGER;
+  /** @return {!string} Type of the block, text length always an integer. */
+  getBlockType: function() {
+    return Blockly.Types.NUMBER;
   }
 };
 
@@ -335,21 +316,25 @@ Blockly.Blocks['text_isEmpty'] = {
    * @this Blockly.Block
    */
   init: function() {
-    this.setHelpUrl(Blockly.Msg.TEXT_ISEMPTY_HELPURL);
-    this.setColour(Blockly.Blocks.texts.HUE);
-    this.interpolateMsg(Blockly.Msg.TEXT_ISEMPTY_TITLE,
-                        ['VALUE',
-                         [Blockly.StaticTyping.blocklyType.TEXT, 'Array'],
-                         Blockly.ALIGN_RIGHT],
-                        Blockly.ALIGN_RIGHT);
-    this.setOutput(true, Blockly.StaticTyping.blocklyType.BOOLEAN);
-    this.setTooltip(Blockly.Msg.TEXT_ISEMPTY_TOOLTIP);
+    this.jsonInit({
+      "message0": Blockly.Msg.TEXT_ISEMPTY_TITLE,
+      "args0": [
+        {
+          "type": "input_value",
+          "name": "VALUE",
+          "check": Blockly.Types.TEXT.compatibles()
+                   .concat('Array'),
+        }
+      ],
+      "output": Blockly.Types.BOOLEAN.basicType,
+      "colour": Blockly.Blocks.texts.HUE,
+      "tooltip": Blockly.Msg.TEXT_ISEMPTY_TOOLTIP,
+      "helpUrl": Blockly.Msg.TEXT_ISEMPTY_HELPURL
+    });
   },
-  /**
-   * Assigns a type to the block, empty check always returns a boolean.
-   */
-  getType: function() {
-    return Blockly.StaticTyping.blocklyType.BOOLEAN;
+  /** @return {!string} Type of the block, check always returns a boolean. */
+  getBlockType: function() {
+    return Blockly.Types.BOOLEAN;
   }
 };
 
@@ -364,12 +349,12 @@ Blockly.Blocks['text_indexOf'] = {
          [Blockly.Msg.TEXT_INDEXOF_OPERATOR_LAST, 'LAST']];
     this.setHelpUrl(Blockly.Msg.TEXT_INDEXOF_HELPURL);
     this.setColour(Blockly.Blocks.texts.HUE);
-    this.setOutput(true, Blockly.StaticTyping.blocklyType.NUMBER);
+    this.setOutput(true, Blockly.Types.NUMBER.basicType);
     this.appendValueInput('VALUE')
-        .setCheck(Blockly.StaticTyping.blocklyType.TEXT)
+        .setCheck(Blockly.Types.TEXT.compatibles())
         .appendField(Blockly.Msg.TEXT_INDEXOF_INPUT_INTEXT);
     this.appendValueInput('FIND')
-        .setCheck(Blockly.StaticTyping.blocklyType.TEXT)
+        .setCheck(Blockly.Types.TEXT.compatibles())
         .appendField(new Blockly.FieldDropdown(OPERATORS), 'END');
     if (Blockly.Msg.TEXT_INDEXOF_TAIL) {
       this.appendDummyInput().appendField(Blockly.Msg.TEXT_INDEXOF_TAIL);
@@ -393,9 +378,9 @@ Blockly.Blocks['text_charAt'] = {
          [Blockly.Msg.TEXT_CHARAT_RANDOM, 'RANDOM']];
     this.setHelpUrl(Blockly.Msg.TEXT_CHARAT_HELPURL);
     this.setColour(Blockly.Blocks.texts.HUE);
-    this.setOutput(true, Blockly.StaticTyping.blocklyType.TEXT);
+    this.setOutput(true, Blockly.Types.TEXT.basicType);
     this.appendValueInput('VALUE')
-        .setCheck(Blockly.StaticTyping.blocklyType.TEXT)
+        .setCheck(Blockly.Types.TEXT.compatibles())
         .appendField(Blockly.Msg.TEXT_CHARAT_INPUT_INTEXT);
     this.appendDummyInput('AT');
     this.setInputsInline(true);
@@ -404,7 +389,7 @@ Blockly.Blocks['text_charAt'] = {
   },
   /**
    * Create XML to represent whether there is an 'AT' input.
-   * @return {Element} XML storage element.
+   * @return {!Element} XML storage element.
    * @this Blockly.Block
    */
   mutationToDom: function() {
@@ -436,8 +421,7 @@ Blockly.Blocks['text_charAt'] = {
     this.removeInput('ORDINAL', true);
     // Create either a value 'AT' input or a dummy input.
     if (isAt) {
-      this.appendValueInput('AT').setCheck(
-          Blockly.StaticTyping.blocklyType.NUMBER);
+      this.appendValueInput('AT').setCheck(Blockly.Types.NUMBER.compatibles());
       if (Blockly.Msg.ORDINAL_NUMBER_SUFFIX) {
         this.appendDummyInput('ORDINAL')
             .appendField(Blockly.Msg.ORDINAL_NUMBER_SUFFIX);
@@ -483,7 +467,7 @@ Blockly.Blocks['text_getSubstring'] = {
     this.setHelpUrl(Blockly.Msg.TEXT_GET_SUBSTRING_HELPURL);
     this.setColour(Blockly.Blocks.texts.HUE);
     this.appendValueInput('STRING')
-        .setCheck(Blockly.StaticTyping.blocklyType.TEXT)
+        .setCheck(Blockly.Types.TEXT.compatibles())
         .appendField(Blockly.Msg.TEXT_GET_SUBSTRING_INPUT_IN_TEXT);
     this.appendDummyInput('AT1');
     this.appendDummyInput('AT2');
@@ -492,14 +476,14 @@ Blockly.Blocks['text_getSubstring'] = {
           .appendField(Blockly.Msg.TEXT_GET_SUBSTRING_TAIL);
     }
     this.setInputsInline(true);
-    this.setOutput(true, Blockly.StaticTyping.blocklyType.TEXT);
+    this.setOutput(true, Blockly.Types.TEXT.basicType);
     this.updateAt_(1, true);
     this.updateAt_(2, true);
     this.setTooltip(Blockly.Msg.TEXT_GET_SUBSTRING_TOOLTIP);
   },
   /**
    * Create XML to represent whether there are 'AT' inputs.
-   * @return {Element} XML storage element.
+   * @return {!Element} XML storage element.
    * @this Blockly.Block
    */
   mutationToDom: function() {
@@ -536,7 +520,8 @@ Blockly.Blocks['text_getSubstring'] = {
     this.removeInput('ORDINAL' + n, true);
     // Create either a value 'AT' input or a dummy input.
     if (isAt) {
-      this.appendValueInput('AT' + n).setCheck(Blockly.StaticTyping.blocklyType.NUMBER);
+      this.appendValueInput('AT' + n).setCheck(
+          Blockly.Types.NUMBER.compatibles());
       if (Blockly.Msg.ORDINAL_NUMBER_SUFFIX) {
         this.appendDummyInput('ORDINAL' + n)
             .appendField(Blockly.Msg.ORDINAL_NUMBER_SUFFIX);
@@ -584,9 +569,9 @@ Blockly.Blocks['text_changeCase'] = {
     this.setHelpUrl(Blockly.Msg.TEXT_CHANGECASE_HELPURL);
     this.setColour(Blockly.Blocks.texts.HUE);
     this.appendValueInput('TEXT')
-        .setCheck(Blockly.StaticTyping.blocklyType.TEXT)
+        .setCheck(Blockly.Types.TEXT.compatibles())
         .appendField(new Blockly.FieldDropdown(OPERATORS), 'CASE');
-    this.setOutput(true, Blockly.StaticTyping.blocklyType.TEXT);
+    this.setOutput(true, Blockly.Types.TEXT.basicType);
     this.setTooltip(Blockly.Msg.TEXT_CHANGECASE_TOOLTIP);
   }
 };
@@ -604,16 +589,14 @@ Blockly.Blocks['text_trim'] = {
     this.setHelpUrl(Blockly.Msg.TEXT_TRIM_HELPURL);
     this.setColour(Blockly.Blocks.texts.HUE);
     this.appendValueInput('TEXT')
-        .setCheck(Blockly.StaticTyping.blocklyType.TEXT)
+        .setCheck(Blockly.Types.TEXT.compatibles())
         .appendField(new Blockly.FieldDropdown(OPERATORS), 'MODE');
-    this.setOutput(true, Blockly.StaticTyping.blocklyType.TEXT);
+    this.setOutput(true, Blockly.Types.TEXT.basicType);
     this.setTooltip(Blockly.Msg.TEXT_TRIM_TOOLTIP);
   },
-  /**
-   * Assigns a type to the block, trim always takes and returns a string.
-   */
-  getType: function() {
-    return Blockly.StaticTyping.blocklyType.TEXT;
+  /** Assigns a type to the block, trim always takes and returns a string. */
+  getBlockType: function() {
+    return Blockly.Types.TEXT;
   }
 };
 
@@ -623,58 +606,20 @@ Blockly.Blocks['text_print'] = {
    * @this Blockly.Block
    */
   init: function() {
-    this.setHelpUrl(Blockly.Msg.TEXT_PRINT_HELPURL);
-    this.setColour(Blockly.Blocks.texts.HUE);
-    this.interpolateMsg(Blockly.Msg.TEXT_PRINT_TITLE,
-                        ['TEXT', null, Blockly.ALIGN_RIGHT],
-                        Blockly.ALIGN_RIGHT);
-    this.setPreviousStatement(true);
-    this.setNextStatement(true);
-    this.setTooltip(Blockly.Msg.TEXT_PRINT_TOOLTIP);
-  }
-};
-
-Blockly.Blocks['text_prompt'] = {
-  /**
-   * Block for prompt function (internal message).
-   * @this Blockly.Block
-   */
-  init: function() {
-    var TYPES =
-        [[Blockly.Msg.TEXT_PROMPT_TYPE_TEXT, 'TEXT'],
-         [Blockly.Msg.TEXT_PROMPT_TYPE_NUMBER,
-          Blockly.StaticTyping.blocklyType.NUMBER]];
-    // Assign 'this' to a variable for use in the closure below.
-    var thisBlock = this;
-    this.setHelpUrl(Blockly.Msg.TEXT_PROMPT_HELPURL);
-    this.setColour(Blockly.Blocks.texts.HUE);
-    var dropdown = new Blockly.FieldDropdown(TYPES, function(newOp) {
-      if (newOp == Blockly.StaticTyping.blocklyType.NUMBER) {
-        thisBlock.changeOutput(Blockly.StaticTyping.blocklyType.NUMBER);
-      } else {
-        thisBlock.changeOutput(Blockly.StaticTyping.blocklyType.TEXT);
-      }
+    this.jsonInit({
+      "message0": Blockly.Msg.TEXT_PRINT_TITLE,
+      "args0": [
+        {
+          "type": "input_value",
+          "name": "TEXT"
+        }
+      ],
+      "previousStatement": null,
+      "nextStatement": null,
+      "colour": Blockly.Blocks.texts.HUE,
+      "tooltip": Blockly.Msg.TEXT_PRINT_TOOLTIP,
+      "helpUrl": Blockly.Msg.TEXT_PRINT_HELPURL
     });
-    this.appendDummyInput()
-        .appendField(dropdown, 'TYPE')
-        .appendField(this.newQuote_(true))
-        .appendField(new Blockly.FieldTextInput(''), 'TEXT')
-        .appendField(this.newQuote_(false));
-    this.setOutput(true, Blockly.StaticTyping.blocklyType.TEXT);
-    // Assign 'this' to a variable for use in the tooltip closure below.
-    var thisBlock = this;
-    this.setTooltip(function() {
-      return (thisBlock.getFieldValue('TYPE') == 'TEXT') ?
-          Blockly.Msg.TEXT_PROMPT_TOOLTIP_TEXT :
-          Blockly.Msg.TEXT_PROMPT_TOOLTIP_NUMBER;
-    });
-  },
-  newQuote_: Blockly.Blocks['text'].newQuote_,
-  /**
-   * Assigns a type to the block, prompt always returns a string.
-   */
-  getType: function() {
-    return Blockly.StaticTyping.blocklyType.TEXT;
   }
 };
 
@@ -685,35 +630,100 @@ Blockly.Blocks['text_prompt_ext'] = {
    */
   init: function() {
     var TYPES =
-        [[Blockly.Msg.TEXT_PROMPT_TYPE_TEXT, 'TEXT'],
-         [Blockly.Msg.TEXT_PROMPT_TYPE_NUMBER,
-          Blockly.StaticTyping.blocklyType.NUMBER]];
-    // Assign 'this' to a variable for use in the closure below.
-    var thisBlock = this;
+        [[Blockly.Msg.TEXT_PROMPT_TYPE_TEXT, Blockly.Types.TEXT.basicType],
+         [Blockly.Msg.TEXT_PROMPT_TYPE_NUMBER, Blockly.Types.NUMBER.basicType]];
     this.setHelpUrl(Blockly.Msg.TEXT_PROMPT_HELPURL);
     this.setColour(Blockly.Blocks.texts.HUE);
+    // Assign 'this' to a variable for use in the closures below.
+    var thisBlock = this;
     var dropdown = new Blockly.FieldDropdown(TYPES, function(newOp) {
-      if (newOp == Blockly.StaticTyping.blocklyType.NUMBER) {
-        thisBlock.changeOutput(Blockly.StaticTyping.blocklyType.NUMBER);
-      } else {
-        thisBlock.changeOutput(Blockly.StaticTyping.blocklyType.TEXT);
-      }
+      thisBlock.updateType_(newOp);
     });
     this.appendValueInput('TEXT')
         .appendField(dropdown, 'TYPE');
-    this.setOutput(true, Blockly.StaticTyping.blocklyType.TEXT);
-    // Assign 'this' to a variable for use in the tooltip closure below.
-    var thisBlock = this;
+    this.setOutput(true, Blockly.Types.TEXT.basicType);
     this.setTooltip(function() {
-      return (thisBlock.getFieldValue('TYPE') == 'TEXT') ?
+      return (thisBlock.getFieldValue('TYPE') == Blockly.Types.TEXT.basicType) ?
           Blockly.Msg.TEXT_PROMPT_TOOLTIP_TEXT :
           Blockly.Msg.TEXT_PROMPT_TOOLTIP_NUMBER;
     });
   },
   /**
-   * Assigns a type to the block, prompt always returns a string.
+   * Modify this block to have the correct output type.
+   * @param {string} newOp Either 'TEXT' or 'NUMBER'.
+   * @private
+   * @this Blockly.Block
    */
-  getType: function() {
-    return Blockly.StaticTyping.blocklyType.TEXT;
+  updateType_: function(newOp) {
+    if (newOp == Blockly.Types.NUMBER.basicType) {
+      this.outputConnection.setCheck(Blockly.Types.NUMBER.compatibles());
+    } else {
+      this.outputConnection.setCheck(Blockly.Types.TEXT.compatibles());
+    }
+  },
+  /**
+   * Create XML to represent the output type.
+   * @return {!Element} XML storage element.
+   * @this Blockly.Block
+   */
+  mutationToDom: function() {
+    var container = document.createElement('mutation');
+    container.setAttribute('type', this.getFieldValue('TYPE'));
+    return container;
+  },
+  /**
+   * Parse XML to restore the output type.
+   * @param {!Element} xmlElement XML storage element.
+   * @this Blockly.Block
+   */
+  domToMutation: function(xmlElement) {
+    this.updateType_(xmlElement.getAttribute('type'));
+  },
+  /** @return {!string} Type of the block, prompt always returns a string. */
+  getBlockType: function() {
+    return (this.getFieldValue('TYPE') == Blockly.Types.TEXT.basicType) ?
+        Blockly.Types.TEXT : Blockly.Types.NUMBER;
+  }
+};
+
+Blockly.Blocks['text_prompt'] = {
+  /**
+   * Block for prompt function (internal message).
+   * The 'text_prompt_ext' block is preferred as it is more flexible.
+   * @this Blockly.Block
+   */
+  init: function() {
+    var TYPES =
+        [[Blockly.Msg.TEXT_PROMPT_TYPE_TEXT, Blockly.Types.TEXT.basicType],
+         [Blockly.Msg.TEXT_PROMPT_TYPE_NUMBER, Blockly.Types.NUMBER.basicType]];
+    // Assign 'this' to a variable for use in the closure below.
+    var thisBlock = this;
+    this.setHelpUrl(Blockly.Msg.TEXT_PROMPT_HELPURL);
+    this.setColour(Blockly.Blocks.texts.HUE);
+    var dropdown = new Blockly.FieldDropdown(TYPES, function(newOp) {
+      thisBlock.updateType_(newOp);
+    });
+    this.appendDummyInput()
+        .appendField(dropdown, 'TYPE')
+        .appendField(this.newQuote_(true))
+        .appendField(new Blockly.FieldTextInput(''), 'TEXT')
+        .appendField(this.newQuote_(false));
+    this.setOutput(true, Blockly.Types.TEXT.basicType);
+    // Assign 'this' to a variable for use in the tooltip closure below.
+    var thisBlock = this;
+    this.setTooltip(function() {
+      return (thisBlock.getFieldValue('TYPE') == Blockly.Types.TEXT.basicType) ?
+          Blockly.Msg.TEXT_PROMPT_TOOLTIP_TEXT :
+          Blockly.Msg.TEXT_PROMPT_TOOLTIP_NUMBER;
+    });
+  },
+  newQuote_: Blockly.Blocks['text'].newQuote_,
+  updateType_: Blockly.Blocks['text_prompt_ext'].updateType_,
+  mutationToDom: Blockly.Blocks['text_prompt_ext'].mutationToDom,
+  domToMutation: Blockly.Blocks['text_prompt_ext'].domToMutation,
+  /** Assigns a type to the block, prompt always returns a string. */
+  getBlockType: function() {
+    return (this.getFieldValue('TYPE') == Blockly.Types.NUMBER.basicType) ?
+        Blockly.Types.NUMBER : Blockly.Types.TEXT;
   }
 };

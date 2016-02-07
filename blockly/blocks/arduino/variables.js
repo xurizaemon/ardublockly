@@ -1,21 +1,23 @@
 /**
  * @license Licensed under the Apache License, Version 2.0 (the "License"):
  *          http://www.apache.org/licenses/LICENSE-2.0
- *
+ */
+
+/**
  * @fileoverview Block for the Arduino map functionality.
- *               The Arduino built in functions syntax can be found at:
- *               http://arduino.cc/en/Reference/HomePage
+ *     The Arduino built in functions syntax can be found at:
+ *     http://arduino.cc/en/Reference/HomePage
  *
  * TODO: This block can be improved to set the new range properly.
  */
 'use strict';
 
-goog.provide('Blockly.Blocks.Arduino.variables');
+goog.require('Blockly.Blocks');
+goog.require('Blockly.Types');
 
-goog.require('Blockly.Arduino');
 
-
-Blockly.Blocks.Arduino.variables.HUE = 330;
+/** Common HSV hue for all blocks in this category. */
+Blockly.Blocks.variables.HUE = 330;
 
 Blockly.Blocks['variables_set_type'] = {
   /**
@@ -24,11 +26,12 @@ Blockly.Blocks['variables_set_type'] = {
    */
   init: function() {
     this.setHelpUrl('http://arduino.cc/en/Reference/HomePage');
-    this.setColour(Blockly.Blocks.Arduino.variables.HUE);
-    this.appendValueInput('VARIABLE_SETTYPE_INPUT', '');
-    this.appendDummyInput('')
+    this.setColour(Blockly.Blocks.variables.HUE);
+    this.appendValueInput('VARIABLE_SETTYPE_INPUT');
+    this.appendDummyInput()
         .appendField('as')
-        .appendField(new Blockly.FieldDropdown(profile.default.types),
+        .appendField(new Blockly.FieldDropdown(
+                         Blockly.Types.getValidTypeArray()),
                      'VARIABLE_SETTYPE_TYPE');
     this.setInputsInline(true);
     this.setOutput(true);
@@ -36,9 +39,11 @@ Blockly.Blocks['variables_set_type'] = {
   },
   /**
    * Assigns a type to the block based on the selected type to cast.
+   * @return {!string} Blockly type for this block configuration.
    * @this Blockly.Block
    */
-  getType: function() {
-    return this.getFieldValue('VARIABLE_SETTYPE_TYPE');
+  getBlockType: function() {
+    var blocklyTypeKey = this.getFieldValue('VARIABLE_SETTYPE_TYPE');
+    return Blockly.Types[blocklyTypeKey];
   }
 };

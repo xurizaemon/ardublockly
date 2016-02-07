@@ -2,96 +2,103 @@
  * @license Licensed under the Apache License, Version 2.0 (the "License"):
  *          http://www.apache.org/licenses/LICENSE-2.0
  *
- * @fileoverview JavaScript for Arduino app with material design.
+ * @fileoverview Ardublockly JavaScript for the Blockly resources and bindings.
  */
 'use strict';
 
-/**
- * Create a namespace for the application.
- */
-var ArduinoMaterial = ArduinoMaterial || {};
+/** Create a namespace for the application. */
+var Ardublockly = Ardublockly || {};
 
 /**
- * Public variable that indicates if Blockly has been injected.
- * @type {!boolean}
+ * Blockly main workspace.
+ * @type Blockly.WorkspaceSvg
  */
-ArduinoMaterial.BLOCKLY_INJECTED = false;
+Ardublockly.workspace = null;
 
 /**
- * Injects Blockly into a given HTML element. Reads the toolbox from an XMl
- * file.
+ * Injects Blockly into a given HTML element. Toolbox XMl has to be a string.
  * @param {!Element} blocklyEl Element to inject Blockly into.
- * @param {!string} toolboxPath String containing the toolbox XML file path.
+ * @param {!string} toolboxXml String containing the toolbox XML content.
+ * @param {!string} blocklyPath String containing the Blockly directory path.
  */
-ArduinoMaterial.injectBlockly = function(blocklyEl, toolboxPath) {
-  // Create a an XML HTTP request
-  var request = ArduinoMaterial.ajaxRequest();
-
-  // If file run locally Internet explorer fails here
-  try {
-    request.open('GET', toolboxPath, true);
-  } catch(e) {
-    $('#not_running_dialog').openModal();
+Ardublockly.injectBlockly = function(blocklyEl, toolboxXml, blocklyPath) {
+  // Remove any trailing slashes in the blockly path
+  if (blocklyPath.substr(-1) === '/') {
+    blocklyPath = blocklyPath.slice(0, -1);
   }
+  var xmlTree = Blockly.Xml.textToDom(toolboxXml);
+  // The Toolbox menu language is edited directly from the XML nodes.
+  Ardublockly.updateToolboxLanguage(xmlTree);
+  Ardublockly.workspace = Blockly.inject(blocklyEl, {
+      collapse: true,
+      comments: true,
+      css: true,
+      disable: true,
+      grid: false,
+      maxBlocks: Infinity,
+      media: blocklyPath + '/media/',
+      rtl: false,
+      scrollbars: true,
+      sounds: true,
+      toolbox: xmlTree,
+      trashcan: true,
+      zoom: {
+        controls: true,
+        wheel: false,
+        startScale: 1.0,
+        maxScale: 2,
+        minScale: 0.2,
+        scaleSpeed: 1.2
+      }
+  });
+  // On language change the blocks have been stored in session storage
+  Ardublockly.loadSessionStorageBlocks();
+};
 
-  // Once file is open, inject blockly into element with the toolbox string
-  request.onreadystatechange = function() {
-    if ( (request.readyState == 4) && (request.status == 200) ) {
-      Blockly.inject(blocklyEl, {
-            collapse: true,
-            comments: true,
-            disable: true,
-            media: '../blockly/media/',
-            rtl: false,
-            scrollbars: true,
-            toolbox: request.responseText,
-            trashcan: true });
-      ArduinoMaterial.BLOCKLY_INJECTED = true;
-    }
-  }
-
-  // If file run locally Chrome will fail here
-  try {
-    request.send(null);
-  } catch(e) {
-    $('#not_running_dialog').openModal();
-  }
+/** Binds the event listeners relevant to Blockly. */
+Ardublockly.bindBlocklyEventListeners = function() {
+  Ardublockly.workspace.addChangeListener(Ardublockly.renderContent);
 };
 
 /**
- * Loads an XML file from the server and adds the blocks into the Blockly
- * workspace.
+ * Loads an XML file from the server and replaces the current blocks into the
+ * Blockly workspace.
+ * @param {!string} xmlFile XML file path in a reachable server (no local path).
+ * @param {!function} callbackFileLoaded Function to be called once the file is
+ *     loaded.
+ * @param {!function} callbackConectonError Function to be called if there is a
+ *     connection error to the XML server.
  */
-ArduinoMaterial.loadXmlBlockFile =
-    function(xmlFile, callbackFileLoaded, callbackConectonError) {
+Ardublockly.loadXmlBlockFile = function(xmlFile, callbackFileLoaded,
+    callbackConectonError) {
   // Create a an XML HTTP request
-  var request = ArduinoMaterial.ajaxRequest();
+  var request = Ardublockly.ajaxRequest();
 
   // If file run locally Internet explorer fails here
   try {
     request.open('GET', xmlFile, true);
-  } catch(e) {
+  } catch (e) {
     callbackConectonError();
   }
 
   // Once file is open, parse the XML into the workspace
   request.onreadystatechange = function() {
-    if ( (request.readyState == 4) && (request.status == 200) ) {
-      var success = ArduinoMaterial.replaceBlocksfromXml(request.responseText);
+    if ((request.readyState == 4) && (request.status == 200)) {
+      var success = Ardublockly.replaceBlocksfromXml(request.responseText);
       callbackFileLoaded(success);
     }
-  }
+  };
 
   // If file run locally Chrome will fail here
   try {
     request.send(null);
-  } catch(e) {
+  } catch (e) {
     callbackConectonError();
   }
 };
 
 /**
- * Renders the Arduino color highlighted code code into an element.
+ * Generates the Arduino code from the Blockly workspace.
  * @return {!string} Arduino code string.
  */
 ArduinoMaterial.generateArduino = function() {
@@ -100,44 +107,45 @@ ArduinoMaterial.generateArduino = function() {
 };
 
 /**
- * Renders the XML code into a given text area.
+ * Generates the XML DOM and returns it as a string.
  * @return {!string} XML code string.
  */
-ArduinoMaterial.generateXml = function() {
-  var xmlDom = Blockly.Xml.workspaceToDom(Blockly.mainWorkspace);
+Ardublockly.generateXml = function() {
+  var xmlDom = Blockly.Xml.workspaceToDom(Ardublockly.workspace);
   var xmlText = Blockly.Xml.domToPrettyText(xmlDom);
   return xmlText;
 };
 
 /**
- * Parses the XML from its input to generate and replace the blocks in the
- * Blockly workspace.
+ * Parses the XML from its argument input to generate and replace the blocks
+ * in the Blockly workspace.
  * @param {!string} blocksXml String of XML code for the blocks.
  * @return {!boolean} Indicates if the XML into blocks parse was successful.
  */
-ArduinoMaterial.replaceBlocksfromXml = function(blocksXml) {
+Ardublockly.replaceBlocksfromXml = function(blocksXml) {
   var xmlDom = null;
   try {
     xmlDom = Blockly.Xml.textToDom(blocksXml);
   } catch (e) {
     return false;
   }
-  Blockly.mainWorkspace.clear();
+  Ardublockly.workspace.clear();
   var sucess = false;
   if (xmlDom) {
-    sucess = ArduinoMaterial.loadBlocksfromXmlDom(xmlDom);
+    sucess = Ardublockly.loadBlocksfromXmlDom(xmlDom);
   }
   return sucess;
 };
 
 /**
- * Parses the XML from its input to generate and add blocks to the workspace.
+ * Parses the XML from its argument input to generate and add blocks to the
+ * Blockly workspace.
  * @param {!string} blocksXmlDom String of XML DOM code for the blocks.
  * @return {!boolean} Indicates if the XML into blocks parse was successful.
  */
-ArduinoMaterial.loadBlocksfromXmlDom = function(blocksXmlDom) {
+Ardublockly.loadBlocksfromXmlDom = function(blocksXmlDom) {
   try {
-    Blockly.Xml.domToWorkspace(Blockly.mainWorkspace, blocksXmlDom);
+    Blockly.Xml.domToWorkspace(Ardublockly.workspace, blocksXmlDom);
   } catch (e) {
     return false;
   }
@@ -145,53 +153,127 @@ ArduinoMaterial.loadBlocksfromXmlDom = function(blocksXmlDom) {
 };
 
 /**
- * Scrolls In or Out the toolbox from the Blockly workspace.
- * As the jQuery animation takes some time a callback is used to continue
- * operation.
- * @param {!boolean} show Indicates to show or hide the toolbox.
- * @param {function=} callback Function to be called once the animation is
- *                             finished.
+ * Save blocks into session storage. Note that MSIE 11 does not support
+ * sessionStorage on file:// URLs.
  */
-ArduinoMaterial.showToolbox = function(show, callback) {
-  var resizeWorkspaceAndCallback = function() {
-    /* For some reason the workspace only resizes after second call */
-    //Blockly.fireUiEvent(window, 'resize');
-    //Blockly.fireUiEvent(window, 'resize');
-    //callback.call();
-  }
-  if (show == false) {
-    $('.blocklyToolboxDiv').slideUp(300, callback);
-  } else {
-    $('.blocklyToolboxDiv').slideDown(300, callback);
+Ardublockly.saveSessionStorageBlocks = function() {
+  if (window.sessionStorage) {
+    var xml = Blockly.Xml.workspaceToDom(Ardublockly.workspace);
+    var text = Blockly.Xml.domToText(xml);
+    window.sessionStorage.loadOnceBlocks = text;
   }
 };
 
-/**
- * Discard all blocks from the workspace.
- */
-ArduinoMaterial.discard = function() {
-  var blockCount = Blockly.mainWorkspace.getAllBlocks().length;
+/** Load blocks saved on session storage and deletes them from storage. */
+Ardublockly.loadSessionStorageBlocks = function() {
+  try {
+    var loadOnce = window.sessionStorage.loadOnceBlocks;
+  } catch (e) {
+    // Firefox sometimes throws a SecurityError when accessing sessionStorage.
+    // Restarting Firefox fixes this, so it looks like a bug.
+    var loadOnce = null;
+  }
+  if (loadOnce) {
+    delete window.sessionStorage.loadOnceBlocks;
+    var xml = Blockly.Xml.textToDom(loadOnce);
+    Blockly.Xml.domToWorkspace(Ardublockly.workspace, xml);
+  }
+};
+
+/** Discard all blocks from the workspace. */
+Ardublockly.discardAllBlocks = function() {
+  var blockCount = Ardublockly.workspace.getAllBlocks().length;
   if (blockCount == 1) {
-    Blockly.mainWorkspace.clear();
-    ArduinoMaterial.renderContent();
+    Ardublockly.workspace.clear();
+    Ardublockly.renderContent();
   } else if (blockCount > 1) {
-    ArduinoMaterial.materialAlert(
+    Ardublockly.alertMessage(
         'Delete blocks?',
-        'There are ' + blockCount + ' blocks on the workspace. Are you \
-        sure you want to delete them?',
+        'There are ' + blockCount + ' blocks on the workspace. Are you sure ' +
+        'you want to delete them?',
         true,
         function() {
-          Blockly.mainWorkspace.clear();
-          ArduinoMaterial.renderContent();
+          Ardublockly.workspace.clear();
+          Ardublockly.renderContent();
         });
   }
 };
 
 /**
- * Creates an AJAX request 
- * @return An XML HTTP Request
+ * Changes the Arduino board profile if different from the currently set one.
+ * @param {string} newBoard Name of the new profile to set.
  */
-ArduinoMaterial.ajaxRequest = function() {
+Ardublockly.changeBlocklyArduinoBoard = function(newBoard) {
+  if (Blockly.Arduino.Boards.selected !== Blockly.Arduino.Boards[newBoard]) {
+    Blockly.Arduino.Boards.changeBoard(Ardublockly.workspace, newBoard);
+  }
+};
+
+/**
+ * Update the toolbox categories language.
+ * @param {!Element} xmlTree Toolbox tree of XML elements.
+ */
+Ardublockly.updateToolboxLanguage = function(xmlTree) {
+  var categories = ['catLogic', 'catLoops', 'catMath', 'catText',
+                    'catVariables', 'catFunctions', 'catInputOutput',
+                    'catTime', 'catMotors', 'catComms'];
+  var categoryNodes = xmlTree.getElementsByTagName('category');
+  for (var i = 0, cat; cat = categoryNodes[i]; i++) {
+    var catId = cat.getAttribute('id');
+    if (MSG[catId]) {
+      cat.setAttribute('name', MSG[catId]);
+    }
+  }
+};
+
+/** Closes the toolbox block container sub-menu. */
+Ardublockly.blocklyCloseToolbox = function() {
+  Ardublockly.workspace.toolbox_.flyout_.hide();
+};
+
+/** @return {!integer} The width of the blockly workspace toolbox. */
+Ardublockly.blocklyToolboxWidth = function() {
+  return Ardublockly.workspace.toolbox_.width;
+};
+
+/** @return {!boolean} Indicates if a block is currently being dragged. */
+Ardublockly.blocklyIsDragging = function() {
+  if (Blockly.dragMode_ != 0) {
+    return true;
+  }
+  return false;
+};
+
+/** Wraps the blockly 'cut' functionality. */
+Ardublockly.blocklyCut = function() {
+  Blockly.copy_(Blockly.selected);
+  Blockly.selected.dispose(true, true);
+};
+
+/** Wraps the blockly 'copy' functionality. */
+Ardublockly.blocklyCopy = function() {
+  Blockly.hideChaff();
+  Blockly.copy_(Blockly.selected);
+};
+
+/** Wraps the blockly 'paste' functionality. */
+Ardublockly.blocklyPaste = function() {
+  if (Blockly.clipboardXml_) {
+    Blockly.hideChaff();
+    Blockly.clipboardSource_.paste(Blockly.clipboardXml_);
+  }
+};
+
+/** Wraps the blockly 'delete' functionality. */
+Ardublockly.blocklyDelete = function() {
+  if (Blockly.selected && Blockly.selected.isDeletable()) {
+    Blockly.hideChaff();
+    Blockly.selected.dispose(true, true);
+  }
+};
+
+/** @return {XMLHttpRequest} An XML HTTP Request multi-browser compatible. */
+Ardublockly.ajaxRequest = function() {
   var request;
   try {
     // Firefox, Chrome, IE7+, Opera, Safari

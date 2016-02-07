@@ -1,21 +1,25 @@
 /**
  * @license Licensed under the Apache License, Version 2.0 (the "License"):
  *          http://www.apache.org/licenses/LICENSE-2.0
- *
+ */
+
+/**
  * @fileoverview Block for the Arduino map functionality.
- *               The Arduino built in functions syntax can be found at:
- *               http://arduino.cc/en/Reference/HomePage
+ *     The Arduino built in functions syntax can be found at:
+ *     http://arduino.cc/en/Reference/HomePage
  *
  * TODO: This block can be improved to set the new range properly.
  */
 'use strict';
 
-goog.provide('Blockly.Blocks.Arduino.map');
+goog.provide('Blockly.Blocks.map');
 
-goog.require('Blockly.Arduino');
+goog.require('Blockly.Blocks');
+goog.require('Blockly.Types');
 
 
-Blockly.Blocks.Arduino.map.HUE = 230;
+/** Common HSV hue for all blocks in this category. */
+Blockly.Blocks.map.HUE = 230;
 
 Blockly.Blocks['base_map'] = {
   /**
@@ -24,24 +28,21 @@ Blockly.Blocks['base_map'] = {
    */
   init: function() {
     this.setHelpUrl('http://arduino.cc/en/Reference/map');
-    this.setColour(Blockly.Blocks.Arduino.map.HUE);
-    this.appendValueInput('NUM', Blockly.StaticTyping.blocklyType.NUMBER)
+    this.setColour(Blockly.Blocks.map.HUE);
+    this.appendValueInput('NUM')
         .appendField('Map ')
-        .setCheck(Blockly.StaticTyping.blocklyType.NUMBER);
-    this.appendValueInput('DMAX', Blockly.StaticTyping.blocklyType.NUMBER)
+        .setCheck(Blockly.Types.NUMBER.compatibles());
+    this.appendValueInput('DMAX')
         .appendField('value to [0-')
-        .setCheck(Blockly.StaticTyping.blocklyType.NUMBER);
-    this.appendDummyInput('')
+        .setCheck(Blockly.Types.NUMBER.compatibles());
+    this.appendDummyInput()
         .appendField(']');
     this.setInputsInline(true);
     this.setOutput(true);
     this.setTooltip('Re-maps a number from [0-1024] to another range.');
   },
-  /**
-   * Assigns a type to the block, the current map implementation for Arduino
-   * takes the inputs a longs and returns a long, so automatic cast to int.
-   */
-  getType: function() {
-    return Blockly.StaticTyping.blocklyType.INTEGER;
+  /** @return {string} The type of return value for the block, an integer. */
+  getBlockType: function() {
+    return Blockly.Types.NUMBER;
   }
 };

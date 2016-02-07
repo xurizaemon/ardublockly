@@ -1,48 +1,48 @@
 /**
  * @license Licensed under the Apache License, Version 2.0 (the "License"):
  *          http://www.apache.org/licenses/LICENSE-2.0
- *
+ */
+
+/**
  * @fileoverview Blocks for Arduino Stepper library.
- *               The Arduino Servo functions syntax can be found in the 
- *               following URL: http://arduino.cc/en/Reference/Stepper
- *               Additional functions apart from the normal generators have 
- *               been added to be able to generate the 'set' drop down menu 
- *               with all current instaces of the Stepper class:
- *               Blockly.Blocks.Arduino.stepper.stepperInstances
- *               Blockly.Blocks.Arduino.stepper.FieldStepperInstance
- *               Blockly.Blocks.Arduino.stepper.stepperDropdownList
+ *     The Arduino Servo functions syntax can be found in the following URL:
+ *     http://arduino.cc/en/Reference/Stepper
+ *     Additional functions apart from the normal generators have been added to
+ *     be able to generate the 'set' drop down menu with all current instances
+ *     of the Stepper class:
+ *         Blockly.Blocks.stepper.stepperInstances
+ *         Blockly.Blocks.stepper.FieldStepperInstance
+ *         Blockly.Blocks.stepper.stepperDropdownList
  *
  * TODO: Still need to had some kind of handler to refresh the "set" drop down
- *       menu values if an instance in a 'configure' block is renamed.
+ *     menu values if an instance in a 'configure' block is renamed.
  */
 'use strict';
 
-goog.provide('Blockly.Blocks.Arduino.stepper');
+goog.provide('Blockly.Blocks.stepper');
 
-goog.require('Blockly.FieldDropdown');
+goog.require('Blockly.Blocks');
+goog.require('Blockly.Types');
 
-goog.require('Blockly.Arduino');
 
+/** Common HSV hue for all blocks in this category. */
+Blockly.Blocks.stepper.HUE = 80;
 
-Blockly.Blocks.Arduino.stepper.HUE = 75;
-
-/**
- * Strings for easy reference
- */
-Blockly.Blocks.Arduino.stepper.noInstance = 'No_Instances';
-Blockly.Blocks.Arduino.stepper.noName = 'Empty_input_name';
+/** Strings for easy reference. */
+Blockly.Blocks.stepper.noInstance = 'No_Instances';
+Blockly.Blocks.stepper.noName = 'Empty_input_name';
 
 /**
  * Finds all user-created instances of the Stepper block config.
  * @return {!Array.<string>} Array of instance names.
  */
-Blockly.Blocks.Arduino.stepper.stepperInstances = function() {
+Blockly.Blocks.stepper.stepperInstances = function() {
   var stepperList = [];
-  var blocks = Blockly.mainWorkspace.getAllBlocks();
+  var blocks = Blockly.mainWorkspace.getTopBlocks();
   for (var x = 0; x < blocks.length; x++) {
-    var getStepperInstance = blocks[x].getStepperInstance;
-    if (getStepperInstance) {
-      var stepperInstance = getStepperInstance.call(blocks[x]);
+    var getStepperSetupInstance = blocks[x].getStepperSetupInstance;
+    if (getStepperSetupInstance) {
+      var stepperInstance = getStepperSetupInstance.call(blocks[x]);
         if (stepperInstance) {
           stepperList.push(stepperInstance);
         }
@@ -55,8 +55,8 @@ Blockly.Blocks.Arduino.stepper.stepperInstances = function() {
  * Return a sorted list of instances names for set dropdown menu.
  * @return {!Array.<string>} Array of stepper instances names.
  */
-Blockly.Blocks.Arduino.stepper.stepperDropdownList = function() {
-  var stepperList = Blockly.Blocks.Arduino.stepper.stepperInstances();
+Blockly.Blocks.stepper.stepperDropdownList = function() {
+  var stepperList = Blockly.Blocks.stepper.stepperInstances();
   var options = [];
   if (stepperList.length > 0) {
     stepperList.sort(goog.string.caseInsensitiveCompare);
@@ -67,8 +67,8 @@ Blockly.Blocks.Arduino.stepper.stepperDropdownList = function() {
     }
   } else {
     // There are no config blocks in the work area
-    options[0] = [Blockly.Blocks.Arduino.stepper.noInstance, 
-                  Blockly.Blocks.Arduino.stepper.noInstance];
+    options[0] = [Blockly.Blocks.stepper.noInstance,
+                  Blockly.Blocks.stepper.noInstance];
   }
   return options;
 };
@@ -78,12 +78,12 @@ Blockly.Blocks.Arduino.stepper.stepperDropdownList = function() {
  * @extends {Blockly.FieldDropdown}
  * @constructor
  */
-Blockly.Blocks.Arduino.stepper.FieldStepperInstance = function() {
-  Blockly.Blocks.Arduino.stepper.FieldStepperInstance.superClass_.constructor.call(
-      this, Blockly.Blocks.Arduino.stepper.stepperDropdownList);
+Blockly.Blocks.stepper.FieldStepperInstance = function() {
+  Blockly.Blocks.stepper.FieldStepperInstance.superClass_.constructor
+      .call(this, Blockly.Blocks.stepper.stepperDropdownList);
 };
 goog.inherits(
-    Blockly.Blocks.Arduino.stepper.FieldStepperInstance, Blockly.FieldDropdown);
+    Blockly.Blocks.stepper.FieldStepperInstance, Blockly.FieldDropdown);
 
 
 Blockly.Blocks['stepper_config'] = {
@@ -94,42 +94,52 @@ Blockly.Blocks['stepper_config'] = {
    */
   init: function() {
     this.setHelpUrl('http://arduino.cc/en/Reference/StepperConstructor');
-    this.setColour(Blockly.Blocks.Arduino.stepper.HUE);
+    this.setColour(Blockly.Blocks.stepper.HUE);
     this.appendDummyInput()
-        .appendField('Configure STEPPER:');
+        .appendField('Setup')
+        .appendField(new Blockly.FieldTextInput('MyStepper'), 'STEPPER_NAME')
+        .appendField('stepper motor:');
     this.appendDummyInput()
-        .appendField('PIN1#')
-        .appendField(new Blockly.FieldDropdown(profile.default.digital),
-            'STEPPER_PIN1')
-        .appendField('PIN2#')
-        .appendField(new Blockly.FieldDropdown(profile.default.digital),
-            'STEPPER_PIN2');
+        .setAlign(Blockly.ALIGN_RIGHT)
+        .appendField('pin1#')
+        .appendField(new Blockly.FieldDropdown(
+            Blockly.Arduino.Boards.selected.digitalPins), 'STEPPER_PIN1')
+        .appendField('pin2#')
+        .appendField(new Blockly.FieldDropdown(
+            Blockly.Arduino.Boards.selected.digitalPins), 'STEPPER_PIN2');
     this.appendValueInput('STEPPER_STEPS')
-        .setCheck(Blockly.StaticTyping.blocklyType.NUMBER)
-        .appendField('Steps in one revolution');
+        .setCheck(Blockly.Types.NUMBER.compatibles())
+        .setAlign(Blockly.ALIGN_RIGHT)
+        .appendField('how many steps per revolution');
     this.appendValueInput('STEPPER_SPEED')
-        .setCheck(Blockly.StaticTyping.blocklyType.NUMBER)
-        .appendField('Set speed to');
-    this.appendValueInput('STEPPER_NAME')
-        .setCheck(Blockly.StaticTyping.blocklyType.TEXT)
-        .appendField('Set name to');
-    this.setTooltip('Configures a stepper motor pinout and other settings');
+        .setCheck(Blockly.Types.NUMBER.compatibles())
+        .setAlign(Blockly.ALIGN_RIGHT)
+        .appendField('set speed (rpm) to');
+    this.setTooltip('Configures a stepper motor pinout and other settings.');
   },
   /**
    * Returns the stepper instance name, defined in the 'STEPPER_NAME' input
    * String block attached to this block.
-   * @return {!Array.<string>} List with the instance name.
+   * @return {!string} List with the instance name.
    * @this Blockly.Block
    */
-  getStepperInstance: function() {
-    var InstanceName = null;
-    var instanceNameBlock = this.getInputTargetBlock('STEPPER_NAME');
-    if (!instanceNameBlock) {
-      InstanceName = Blockly.Blocks.Arduino.stepper.noName;
-    } else {
-      InstanceName = instanceNameBlock.getFieldValue('TEXT');
+  getStepperSetupInstance: function() {
+    var InstanceName = this.getFieldValue('STEPPER_NAME');
+    if (!InstanceName) {
+      InstanceName = Blockly.Blocks.stepper.noName;
     }
-    return InstanceName;
+    // Replace all spaces with underscores
+    return InstanceName.replace(/ /g, '_');
+  },
+  /**
+   * Updates the content of the the pin related fields.
+   * @this Blockly.Block
+   */
+  updateFields: function() {
+    Blockly.Boards.refreshBlockFieldDropdown(
+        this, 'STEPPER_PIN1', 'digitalPins');
+    Blockly.Boards.refreshBlockFieldDropdown(
+        this, 'STEPPER_PIN2', 'digitalPins');
   }
 };
 
@@ -140,16 +150,15 @@ Blockly.Blocks['stepper_step'] = {
    */
   init: function() {
     this.setHelpUrl('http://arduino.cc/en/Reference/StepperStep');
-    this.setColour(Blockly.Blocks.Arduino.stepper.HUE);
-    this.interpolateMsg(
-        // TODO: Combine these messages instead of using concatenation.
-        'STEPPER' + ' %1 ' +
-        'move' + ' %2' + 'steps',
-        ['STEPPER_NAME',
-         new Blockly.Blocks.Arduino.stepper.FieldStepperInstance()],
-        ['STEPPER_STEPS',
-         Blockly.StaticTyping.blocklyType.NUMBER, Blockly.ALIGN_RIGHT],
-        Blockly.ALIGN_RIGHT);
+    this.setColour(Blockly.Blocks.stepper.HUE);
+    this.appendDummyInput()
+        .appendField('move stepper')
+        .appendField(new Blockly.Blocks.stepper.FieldStepperInstance(),
+            'STEPPER_NAME');
+    this.appendValueInput('STEPPER_STEPS')
+        .setCheck(Blockly.Types.NUMBER.compatibles());
+    this.appendDummyInput()
+        .appendField('steps');
     this.setPreviousStatement(true);
     this.setNextStatement(true);
     this.setTooltip('Turns the stepper motor a specific number of steps.');
@@ -161,31 +170,27 @@ Blockly.Blocks['stepper_step'] = {
    * @this Blockly.Block
    */
   onchange: function() {
-    if (!this.workspace) {
-      // Block has been deleted.
-      return;
-    }
+    if (!this.workspace) { return; }  // Block has been deleted.
 
     var currentDropdown = this.getFieldValue('STEPPER_NAME');
-    var instances = Blockly.Blocks.Arduino.stepper.stepperDropdownList();
+    var instances = Blockly.Blocks.stepper.stepperDropdownList();
 
     // Check for configuration block presence
-    if (instances[0][0] === Blockly.Blocks.Arduino.stepper.noInstance) {
+    if (instances[0][0] === Blockly.Blocks.stepper.noInstance) {
       // Ensure dropdown menu says there is no config block
-      if (currentDropdown !== Blockly.Blocks.Arduino.stepper.noInstance) {
-        this.setFieldValue(
-            Blockly.Blocks.Arduino.stepper.noInstance, 'STEPPER_NAME');
+      if (currentDropdown !== Blockly.Blocks.stepper.noInstance) {
+        this.setFieldValue(Blockly.Blocks.stepper.noInstance, 'STEPPER_NAME');
       }
-      this.setWarningText('A STEPPER configuration block must be added to ' +
-          'use this block!');
+      this.setWarningText(
+          'A STEPPER configuration block must be added to use this block!');
     } else {
       // Configuration blocks present, check if any selected and contains name
       var existingConfigSelected = false;
       for (var x = 0; x < instances.length; x++) {
         // Check if any of the config blocks does not have a name
-        if (instances[x][0] === Blockly.Blocks.Arduino.stepper.noName) {
+        if (instances[x][0] === Blockly.Blocks.stepper.noName) {
           // If selected config has no name either, set warning and exit func
-          if (currentDropdown === Blockly.Blocks.Arduino.stepper.noName) {
+          if (currentDropdown === Blockly.Blocks.stepper.noName) {
             this.setWarningText('A Name input must be added to the Stepper ' +
                                 'configuration block!');
             return;
@@ -200,14 +205,14 @@ Blockly.Blocks['stepper_step'] = {
         // All good, just remove any warnings and exit the function
         this.setWarningText(null);
       } else {
-        if ((currentDropdown === Blockly.Blocks.Arduino.stepper.noName) ||
-            (currentDropdown === Blockly.Blocks.Arduino.stepper.noInstance)) {
+        if ((currentDropdown === Blockly.Blocks.stepper.noName) ||
+            (currentDropdown === Blockly.Blocks.stepper.noInstance)) {
           // Just pick the first config block
           this.setFieldValue(instances[0][0], 'STEPPER_NAME');
           this.setWarningText(null);
         } else {
-          // Al this point just set a waning to select a valid stepper config
-          this.setWarningText('Selected stepper does not exist anymore, ' +
+          // Al this point just set a warning to select a valid stepper config
+          this.setWarningText('Selected stepper does not exist any more, ' +
                               'please select a new one.');
         }
       }

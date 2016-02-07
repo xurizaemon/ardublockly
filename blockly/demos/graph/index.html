@@ -60,35 +60,86 @@
   <xml id="toolbox" style="display: none">
     <category name="Math">
       <block type="math_number"></block>
-      <block type="math_arithmetic"></block>
-      <block type="math_single"></block>
-      <block type="math_trig"></block>
-      <block type="math_constant"></block>
-      <block type="math_number_property"></block>
-      <block type="math_round"></block>
-      <block type="math_modulo"></block>
-      <block type="math_constrain">
-        <value name="LOW">
-          <block type="math_number">
+      <block type="math_arithmetic">
+        <value name="A">
+          <shadow type="math_number">
             <field name="NUM">1</field>
-          </block>
+          </shadow>
+        </value>
+        <value name="B">
+          <shadow type="math_number">
+            <field name="NUM">1</field>
+          </shadow>
+        </value>
+      </block>
+      <block type="math_single">
+        <value name="NUM">
+          <shadow type="math_number">
+            <field name="NUM">9</field>
+          </shadow>
+        </value>
+      </block>
+      <block type="math_trig">
+        <value name="NUM">
+          <shadow type="math_number">
+            <field name="NUM">45</field>
+          </shadow>
+        </value>
+      </block>
+      <block type="math_constant"></block>
+      <block type="math_number_property">
+        <value name="NUMBER_TO_CHECK">
+          <shadow type="math_number">
+            <field name="NUM">0</field>
+          </shadow>
+        </value>
+      </block>
+      <block type="math_round">
+        <value name="NUM">
+          <shadow type="math_number">
+            <field name="NUM">3.1</field>
+          </shadow>
+        </value>
+      </block>
+      <block type="math_modulo">
+        <value name="DIVIDEND">
+          <shadow type="math_number">
+            <field name="NUM">64</field>
+          </shadow>
+        </value>
+        <value name="DIVISOR">
+          <shadow type="math_number">
+            <field name="NUM">10</field>
+          </shadow>
+        </value>
+      </block>
+      <block type="math_constrain">
+        <value name="VALUE">
+          <shadow type="math_number">
+            <field name="NUM">50</field>
+          </shadow>
+        </value>
+        <value name="LOW">
+          <shadow type="math_number">
+            <field name="NUM">1</field>
+          </shadow>
         </value>
         <value name="HIGH">
-          <block type="math_number">
+          <shadow type="math_number">
             <field name="NUM">100</field>
-          </block>
+          </shadow>
         </value>
       </block>
       <block type="math_random_int">
         <value name="FROM">
-          <block type="math_number">
+          <shadow type="math_number">
             <field name="NUM">1</field>
-          </block>
+          </shadow>
         </value>
         <value name="TO">
-          <block type="math_number">
+          <shadow type="math_number">
             <field name="NUM">100</field>
-          </block>
+          </shadow>
         </value>
       </block>
       <block type="math_random_float"></block>
@@ -112,11 +163,17 @@
           <field name="OP">POWER</field>
           <value name="A">
             <block type="graph_get_x"></block>
+            <shadow type="math_number">
+              <field name="NUM">1</field>
+            </shadow>
           </value>
           <value name="B">
             <block type="math_number">
               <field name="NUM">2</field>
             </block>
+            <shadow type="math_number">
+              <field name="NUM">1</field>
+            </shadow>
           </value>
         </block>
       </value>
@@ -140,7 +197,7 @@ Blockly.Blocks['graph_get_x'] = {
     this.setColour(330);
     this.appendDummyInput()
         .appendField('x');
-    this.setOutput(true, Blockly.StaticTyping.blocklyType.NUMBER);
+    this.setOutput(true, 'Number');
     this.setTooltip(Blockly.Msg.VARIABLES_GET_TOOLTIP);
   }
 };
@@ -157,7 +214,7 @@ Blockly.Blocks['graph_set_y'] = {
     this.setColour(330);
     this.appendValueInput('VALUE')
         .appendField('y =')
-        .setCheck(Blockly.StaticTyping.blocklyType.NUMBER);
+        .setCheck('Number');
     this.setTooltip(Blockly.Msg.VARIABLES_SET_TOOLTIP);
   }
 };
@@ -176,20 +233,20 @@ var Graph = {};
 
 /**
  * Main Blockly workspace.
- * @type Blockly.WorkspaceSvg
+ * @type {Blockly.WorkspaceSvg}
  */
 Graph.workspace = null;
 
 /**
  * Cached copy of the function string.
- * @type ?string
+ * @type {?string}
  * @private
  */
 Graph.oldFormula_ = null;
 
 /**
  * Drawing options for the Chart API.
- * @type !Object
+ * @type {!Object}
  * @private
  */
 Graph.options_ = {
@@ -269,8 +326,9 @@ Graph.resize = function() {
  * Initialize Blockly and the graph.  Called on page load.
  */
 Graph.init = function() {
-  Graph.workspace = Blockly.inject(document.getElementById('blocklyDiv'),
-      {toolbox: document.getElementById('toolbox')});
+  Graph.workspace = Blockly.inject('blocklyDiv',
+      {media: '../../media/',
+       toolbox: document.getElementById('toolbox')});
   Blockly.Xml.domToWorkspace(Graph.workspace,
       document.getElementById('startBlocks'));
 
